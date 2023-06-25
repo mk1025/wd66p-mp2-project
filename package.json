@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "serve": "node server.js",
-    "tailwind": "npx tailwindcss -i ./src/styles/styles.scss -o ./src/styles/styles.css"
+    "tailwind": "npx tailwindcss -i ./src/styles/styles.scss -o ./src/styles/styles.css --watch"
   },
   "repository": {
     "type": "git",
