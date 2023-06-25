@@ -1,6 +1,7 @@
 const express = require("express");
 const { execSync } = require("child_process");
 const path = require("path");
+const open = require("openurl");
 
 const app = express();
 const port = 3000;
@@ -19,4 +20,6 @@ app.use(express.static(htmlFilesDir));
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
+
+  open.open(`http://localhost:${port}`);
 });
