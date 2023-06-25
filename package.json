@@ -4,7 +4,7 @@
   "description": "My WD66P MP2 Project",
   "main": "index.js",
   "scripts": {
-    "test": "node index.js"
+    "serve": "node index.js"
   },
   "repository": {
     "type": "git",

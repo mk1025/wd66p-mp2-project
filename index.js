@@ -6,7 +6,7 @@ const app = express();
 const port = 3000;
 
 const phpFilesDir = path.join(__dirname, "src", "php");
-const htmlFilesDir = path.join(__dirname, "/src");
+const htmlFilesDir = path.join(__dirname, "src");
 
 app.use("/php", (req, res) => {
   const url = req.url === "/" ? "/index.php" : req.url;
