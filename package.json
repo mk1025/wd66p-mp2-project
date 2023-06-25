@@ -4,7 +4,8 @@
   "description": "My WD66P MP2 Project",
   "main": "server.js",
   "scripts": {
-    "serve": "node server.js"
+    "serve": "node server.js",
+    "tailwind": "npx tailwindcss -i ./src/styles/styles.scss -o ./src/styles/styles.css"
   },
   "repository": {
     "type": "git",
@@ -23,5 +24,8 @@
     "php": "^1.0.2",
     "php-express": "^0.0.3",
     "php-server": "^1.0.0"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.3.2"
   }
 }
