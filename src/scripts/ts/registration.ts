@@ -196,23 +196,27 @@ function validationMessage(id: string, message: string, appear: boolean) {
 }
 
 function sendData() {
-  const data = {
-    email_address: emailInput.value,
-    username: usernameInput.value,
-    password: passwordInput.value,
+  const data: any = {
+    email_address: $("#email").val(),
+    username: $("#username").val(),
+    password: $("#password").val(),
+    first_name: $("#first_name").val(),
+    last_name: $("#last_name").val(),
+    image: $("#profile_upload").val(),
   };
 
-  // console.log(JSON.stringify(data));
-
-  fetch("php/registration.php", {
-    method: "POST",
-    body: JSON.stringify(data),
-  })
-    .then((response) => response.text())
-    .then((result) => {
-      console.log(result);
-    })
-    .catch((error) => {
-      console.error("Error: ", error);
-    });
+  $.ajax({
+    type: "POST",
+    url: "php/registration.php",
+    data: "reg=" + JSON.stringify(data),
+    success: function (response) {
+      console.log(response);
+    },
+    error: function (xhr, status, error) {
+      console.log(xhr.status);
+      console.log(xhr.responseText);
+      console.log(status);
+      console.error(error);
+    },
+  });
 }

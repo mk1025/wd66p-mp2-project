@@ -9,7 +9,8 @@
 
     <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
     <script src="https://kit.fontawesome.com/7369d6167e.js" crossorigin="anonymous"></script>
-    <script src="registration.js" defer></script>
+    <script src="./scripts/js/registration.js" defer></script>
+    <script src="../node_modules/jquery/dist/jquery.min.js"></script>
   </head>
 
   <body class="min-h-screen w-full bg-slate-600 md:py-10">
@@ -43,7 +44,7 @@
         </div>
         <div class="mb-6">
           <label for="email" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
-            >Email Address</label
+            >Email Address <sup>*</sup></label
           >
           <input
             type="email"
@@ -55,8 +56,38 @@
           />
         </div>
         <div class="mb-6">
+          <label
+            for="first_name"
+            class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+            >First Name <sup>*</sup></label
+          >
+          <input
+            type="text"
+            id="first_name"
+            name="first_name"
+            class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+            placeholder="John"
+            required
+          />
+        </div>
+        <div class="mb-6">
+          <label
+            for="last_name"
+            class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
+            >Last Name <sup>*</sup></label
+          >
+          <input
+            type="text"
+            id="last_name"
+            name="last_name"
+            class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+            placeholder="Smith"
+            required
+          />
+        </div>
+        <div class="mb-6">
           <label for="username" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
-            >Username</label
+            >Username <sup>*</sup></label
           >
           <input
             type="text"
@@ -73,7 +104,7 @@
         </div>
         <div class="mb-6">
           <label for="password" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white"
-            >Password</label
+            >Password <sup>*</sup></label
           >
           <input
             type="password"
