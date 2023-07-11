@@ -93,22 +93,22 @@ function createNewUser($newData, $table)
 {
     global $connection;
 
-    if (searchEmail($newData["email_address"])) {
+    if (searchEmail(strtolower($newData["email_address"]))) {
         returnResponse(409, "Email Error", "Email already exists", "Duplicate email found", "");
     }
-    if (searchUsername($newData["username"])) {
+    if (searchUsername(strtolower($newData["username"]))) {
         returnResponse(409, "Username Error", "Username already exists", "Duplicate username found", "");
     }
 
 
-    $email = $newData["email_address"];
-    $username = $newData["username"];
+    $email = strtolower($newData["email_address"]);
+    $username = strtolower($newData["username"]);
 
     $password = $newData["password"];
     $password = password_hash($password, PASSWORD_ARGON2I);
 
-    $first_name = $newData["first_name"];
-    $last_name = $newData["last_name"];
+    $first_name = ucwords($newData["first_name"]);
+    $last_name = ucwords($newData["last_name"]);
 
 
     if (isset($newData["image"])) {
