@@ -14,13 +14,13 @@ if ($connection->connect_error) {
 
 
 if ($_SERVER['REQUEST_METHOD'] === "POST") {
-    $postData = array();
-
-    $postData['email_address'] = $_POST['email_address'];
-    $postData['username'] = $_POST['username'];
-    $postData['password'] = $_POST['password'];
-    $postData['first_name'] = $_POST['first_name'];
-    $postData['last_name'] = $_POST['last_name'];
+    $postData = array(
+        "email_address" => $_POST['email_address'],
+        "username" => $_POST['username'],
+        "password" => $_POST['password'],
+        "first_name" => $_POST['first_name'],
+        "last_name" => $_POST['last_name']
+    );
 
     $imageFile = $_FILES['image'];
     $postData['image'] = array(
@@ -31,14 +31,13 @@ if ($_SERVER['REQUEST_METHOD'] === "POST") {
         'size' => $imageFile['size']
     );
 
-
-
-
     $tableName = "users";
 
     $DB_NAME = DB_NAME;
 
-    $checkTableSQL = "SELECT 1 FROM information_schema.tables WHERE table_schema = '$DB_NAME' AND table_name = '$tableName' LIMIT 1";
+    $checkTableSQL = "SELECT 1 FROM information_schema.tables
+                        WHERE table_schema = '$DB_NAME'
+                        AND table_name = '$tableName' LIMIT 1";
 
     $result = $connection->query($checkTableSQL);
 
@@ -48,20 +47,21 @@ if ($_SERVER['REQUEST_METHOD'] === "POST") {
     } else {
         $createTableSQL = "CREATE TABLE $tableName (
             `key` INT(11) AUTO_INCREMENT PRIMARY KEY,
-            uid VARCHAR(255) NOT NULL,
+            uid VARCHAR(255) NOT NULL UNIQUE,
             first_name VARCHAR(255) NOT NULL,
             last_name VARCHAR(255) NOT NULL,
-            username VARCHAR(255) NOT NULL,
+            username VARCHAR(255) NOT NULL UNIQUE,
             password VARCHAR(255) NOT NULL,
-            email VARCHAR(255) NOT NULL,
-            image VARCHAR(255),
-            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP)";
+            email VARCHAR(255) NOT NULL UNIQUE,
+            image_path VARCHAR(255),
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )";
 
         if ($connection->query($createTableSQL)) {
-            returnResponse(201, "Table Created", "Database Table Created Successfully", "", "");
+            // returnResponse(201, "Table Created", "Database Table Created Successfully", "", "");
             createNewUser($postData, $tableName);
         } else {
-            returnResponse(400, "DB Table Error", "Server DB Error", $connection->error, "");
+            returnResponse(400, "Internal Server Error", "Internal Server Error", $connection->error, "");
         }
     }
 }
@@ -104,8 +104,7 @@ function createNewUser($newData, $table)
     $email = strtolower($newData["email_address"]);
     $username = strtolower($newData["username"]);
 
-    $password = $newData["password"];
-    $password = password_hash($password, PASSWORD_ARGON2I);
+    $password = password_hash($newData["password"], PASSWORD_ARGON2I);
 
     $first_name = ucwords($newData["first_name"]);
     $last_name = ucwords($newData["last_name"]);
@@ -132,33 +131,51 @@ function createNewUser($newData, $table)
 
 
         if (move_uploaded_file($imageFile["tmp_name"], $targetFilePath)) {
-            $addUserSQL = "INSERT INTO $table (uid, first_name, last_name, username, password, email, image, timestamp) VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)";
+            $addUserSQL = "INSERT INTO $table (
+                uid,
+                first_name,
+                last_name,
+                username,
+                password,
+                email,
+                image_path,
+                created_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)";
 
             $stmt = $connection->prepare($addUserSQL);
 
-            $stmt->bind_param("sssssss", $newUID, $first_name, $last_name, $username, $password, $email, $targetFilePath);
+            $stmt->bind_param(
+                "sssssss",
+                $newUID,
+                $first_name,
+                $last_name,
+                $username,
+                $password,
+                $email,
+                $targetFilePath
+            );
 
             if ($stmt->execute()) {
-                returnResponse(201, "User Created", "Registration Complete", "", "");
+                returnResponse(201, "Registration Complete", "Log In from the Homepage", "", "");
             } else {
-                returnResponse(400, "User Creation Failed", "Registration Failed", $stmt->error, "");
+                returnResponse(400, "Registration Failed", "Internal Server Error", $stmt->error, "");
             }
         } else {
-            returnResponse(400, "User Creation Failed", "Registration Failed: Image Upload Failed", "", "");
+            returnResponse(400, "Registration Failed", "Image Upload Failed", "", "");
         }
     } else {
-        returnResponse(400, "Image Error", "Image not provided", "Image key not found in data", "");
+        returnResponse(400, "Registration Failed", "Internal Server Error", "Image Error", "");
     }
 }
 
 
 function generateUID($length)
 {
-    $characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    $characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     $sequence = '';
 
     for ($i = 0; $i < $length; $i++) {
-        $randomIndex = mt_rand(0, strlen($characters) - 1);
+        $randomIndex = random_int(0, strlen($characters) - 1);
         $sequence .= $characters[$randomIndex];
     }
 
@@ -168,7 +185,13 @@ function generateUID($length)
 function returnResponse($status, $title, $message, $description, $data)
 {
     http_response_code($status);
-    $returnJSON = ["status" => $status, "title" => $title, "message" => $message, "description" => $description, "data" => $data];
+    $returnJSON = [
+        "status" => $status,
+        "title" => $title,
+        "message" => $message,
+        "description" => $description,
+        "data" => $data
+    ];
     echo json_encode($returnJSON, JSON_PRETTY_PRINT);
     exit();
 }
