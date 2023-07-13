@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard</title>
+
+    <link
+      rel="shortcut icon"
+      href="./assets/favicon/favicon.ico"
+      type="image/x-icon"
+    />
+    <link rel="stylesheet" href="./styles/styles.css" />
+    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
+    <script src="" defer></script>
+    <script
+      src="https://kit.fontawesome.com/7369d6167e.js"
+      crossorigin="anonymous"
+    ></script>
+    <script src="../node_modules/jquery/dist/jquery.min.js"></script>
+  </head>
+  <body class="">
+    <main class="grid grid-flow-col max-h-screen">
+      <nav class="flex flex-col items-center gap-5 w-max bg-slate-500 h-screen">
+        <button
+          class="px-2 py-1 text-white hover:bg-white rounded hover:text-slate-500 mt-2"
+        >
+          <span id="SideMenuIcon_LeftAngle" class="visible">
+            <i class="fa-solid fa-angle-left"></i>
+          </span>
+          <i class="fa-solid fa-bars"></i>
+          <span id="SideMenuIcon_RightAngle" class="invisible">
+            <i class="fa-solid fa-angle-right"></i>
+          </span>
+        </button>
+        <div class="flex flex-col items-center p-5">
+          <img
+            src="./assets/placeholders/account.png"
+            class="w-[3rem] h-[3rem] rounded-full object-cover mb-5"
+            alt="profile_pic"
+          />
+          <span id="Profile_FirstName" class="font-medium text-white"
+            >First Name</span
+          >
+          <span id="Profile_LastName" class="font-medium text-white"
+            >Last Name</span
+          >
+        </div>
+        <div class="flex flex-col w-full">
+          <a href="dashboard-records.html">
+            <button
+              class="flex flex-row items-center gap-2 font-semibold text-white bg-slate-400 w-full p-2 hover:bg-slate-600"
+            >
+              <i class="fa-solid fa-book w-[2rem]"></i>
+              <span>Class Records</span>
+            </button>
+          </a>
+          <a href="dashboard-students.html">
+            <button
+              class="flex flex-row items-center gap-2 font-semibold text-white bg-slate-400 w-full p-2 hover:bg-slate-600"
+            >
+              <i class="fa-solid fa-address-card w-[2rem]"></i>
+              <span>Students</span>
+            </button>
+          </a>
+          <a href="dashboard-account.html">
+            <button
+              class="flex flex-row items-center gap-2 font-semibold text-white bg-slate-400 w-full p-2 hover:bg-slate-600"
+            >
+              <i class="fa-solid fa-gear w-[2rem]"></i>
+              <span>Account</span>
+            </button>
+          </a>
+        </div>
+      </nav>
+      <section class="w-full overflow-y-auto">
+        <div class="h-full"></div>
+      </section>
+    </main>
+  </body>
+</html>
