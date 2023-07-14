@@ -6,13 +6,20 @@
 
     <title>Sign In</title>
 
-    <link rel="shortcut icon" href="./assets/favicon/favicon.ico" type="image/x-icon" />
-    <link rel="stylesheet" href="./styles/styles.css" />
+    <link
+      rel="shortcut icon"
+      href="../../assets/favicon/favicon.ico"
+      type="image/x-icon"
+    />
+    <link rel="stylesheet" href="../../styles/styles.css" />
     <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
 
-    <script src="./scripts/js/login.js" defer></script>
-    <script src="https://kit.fontawesome.com/7369d6167e.js" crossorigin="anonymous"></script>
-    <script src="../node_modules/jquery/dist/jquery.min.js"></script>
+    <script src="script.js" type="module" defer></script>
+    <script
+      src="https://kit.fontawesome.com/7369d6167e.js"
+      crossorigin="anonymous"
+    ></script>
+    <script src="../../node_modules/jquery/dist/jquery.min.js"></script>
   </head>
   <body class="w-full min-h-screen bg-slate-600 md:py-10 flex items-center">
     <main
@@ -37,7 +44,9 @@
         >
       </div>
       <div class="mt-10 mb-6">
-        <label for="email_username" class="mb-2 block text-sm font-medium text-gray-900"
+        <label
+          for="email_username"
+          class="mb-2 block text-sm font-medium text-gray-900"
           >Email or Username</label
         >
         <input
@@ -48,7 +57,11 @@
         />
       </div>
       <div class="mb-6">
-        <label for="password" class="mb-2 block text-sm font-medium text-gray-900">Password</label>
+        <label
+          for="password"
+          class="mb-2 block text-sm font-medium text-gray-900"
+          >Password</label
+        >
         <input
           type="password"
           name="password"
@@ -57,7 +70,9 @@
         />
       </div>
       <div class="my-6">
-        <a href="" class="text-sm text-blue-500 hover:underline">Forgot Password?</a>
+        <a href="" class="text-sm text-blue-500 hover:underline"
+          >Forgot Password?</a
+        >
       </div>
       <div class="flex flex-row gap-5">
         <button
@@ -69,7 +84,9 @@
           Sign In
         </button>
         <div id="spinner" class="hidden flex align-middle items-center">
-          <i class="fa-solid fa-circle-notch fa-spin text-blue-600 text-2xl"></i>
+          <i
+            class="fa-solid fa-circle-notch fa-spin text-blue-600 text-2xl"
+          ></i>
         </div>
       </div>
     </main>

@@ -1,28 +1,43 @@
-const PROFILE_MIN_WIDTH = 200;
-const PROFILE_MIN_HEIGHT = 200;
-const PROFILE_MAX_WIDTH = 2048;
-const PROFILE_MAX_HEIGHT = 2048;
+import * as Environment from "../../scripts/env.js";
+import * as Routes from "../../scripts/routes.js";
+import * as RegEx from "../../scripts/regex.js";
 
-const profileUploadBtn = document.getElementById("profile_upload") as HTMLInputElement;
-const profilePlaceholder = document.getElementById("Profile_Placeholder") as HTMLImageElement;
+const profileUploadBtn = document.getElementById(
+  "profile_upload",
+) as HTMLInputElement;
+const profilePlaceholder = document.getElementById(
+  "Profile_Placeholder",
+) as HTMLImageElement;
 
 const alertBox = document.getElementById("alert-box") as HTMLDivElement;
-const alertRedMessages = document.getElementById("alert-red-messages") as HTMLDivElement;
+const alertRedMessages = document.getElementById(
+  "alert-red-messages",
+) as HTMLDivElement;
 
 const emailInput = document.getElementById("email") as HTMLInputElement;
-const firstNameInput = document.getElementById("first_name") as HTMLInputElement;
+const firstNameInput = document.getElementById(
+  "first_name",
+) as HTMLInputElement;
 const lastNameInput = document.getElementById("last_name") as HTMLInputElement;
 const usernameInput = document.getElementById("username") as HTMLInputElement;
 const passwordInput = document.getElementById("password") as HTMLInputElement;
-const confirmPasswordInput = document.getElementById("confirm_password") as HTMLInputElement;
+const confirmPasswordInput = document.getElementById(
+  "confirm_password",
+) as HTMLInputElement;
 
-const registerButton = document.getElementById("Register_Button") as HTMLButtonElement;
+const registerButton = document.getElementById(
+  "Register_Button",
+) as HTMLButtonElement;
 
-const homepageButton = document.getElementById("Homepage_Button") as HTMLButtonElement;
+const homepageButton = document.getElementById(
+  "Homepage_Button",
+) as HTMLButtonElement;
 
 homepageButton.addEventListener("click", () => {
-  window.location.href = "index.html";
+  window.location.href = Routes.HOME_PAGE;
 });
+
+registerButton.addEventListener("click", sendData);
 
 emailInput.addEventListener("input", () => {
   if (!emailInput.validity.valid) {
@@ -39,7 +54,7 @@ firstNameInput.addEventListener("input", checkAllInputs);
 lastNameInput.addEventListener("input", checkAllInputs);
 
 usernameInput.addEventListener("input", () => {
-  const pattern = /^[A-Za-z0-9_]+$/;
+  const pattern = /^\w+$/;
 
   if (!usernameInput.validity.valid) {
     usernameInput.value.length < usernameInput.minLength
@@ -85,12 +100,6 @@ usernameInput.addEventListener("input", () => {
 });
 
 passwordInput.addEventListener("input", () => {
-  const digitLookahead = /(?=.*\d)/;
-  const lowercaseLookahead = /(?=.*[a-z])/;
-  const uppercaseLookahead = /(?=.*[A-Z])/;
-  const specialLookahead = /(?=.*[!@#$%^&*])/;
-  const spaceLookahead = /\s/;
-
   if (!passwordInput.validity.valid) {
     passwordInput.value.length < passwordInput.minLength
       ? validationMessage(
@@ -108,11 +117,15 @@ passwordInput.addEventListener("input", () => {
         )
       : validationMessage("vm-password-maxlength", "", false);
 
-    !digitLookahead.test(passwordInput.value)
-      ? validationMessage("vm-password-digits", "Password must contain at least one digit", true)
+    !RegEx.REGEX_CONTAINS_DIGITS.test(passwordInput.value)
+      ? validationMessage(
+          "vm-password-digits",
+          "Password must contain at least one digit",
+          true,
+        )
       : validationMessage("vm-password-digits", "", false);
 
-    !lowercaseLookahead.test(passwordInput.value)
+    !RegEx.REGEX_CONTAINS_LOWERCASE.test(passwordInput.value)
       ? validationMessage(
           "vm-password-lowercase",
           "Password must contain at least one lowercase character",
@@ -120,7 +133,7 @@ passwordInput.addEventListener("input", () => {
         )
       : validationMessage("vm-password-lowercase", "", false);
 
-    !uppercaseLookahead.test(passwordInput.value)
+    !RegEx.REGEX_CONTAINS_UPPERCASE.test(passwordInput.value)
       ? validationMessage(
           "vm-password-uppercase",
           "Password must contain at least one uppercase character",
@@ -128,7 +141,7 @@ passwordInput.addEventListener("input", () => {
         )
       : validationMessage("vm-password-uppercase", "", false);
 
-    !specialLookahead.test(passwordInput.value)
+    !RegEx.REGEX_CONTAINS_SPECIAL.test(passwordInput.value)
       ? validationMessage(
           "vm-password-special",
           "Password must have atleast one special character (!@#$%^&*)",
@@ -136,8 +149,12 @@ passwordInput.addEventListener("input", () => {
         )
       : validationMessage("vm-password-special", "", false);
 
-    spaceLookahead.test(passwordInput.value)
-      ? validationMessage("vm-password-spaces", "Password cannot contain spaces", true)
+    RegEx.REGEX_CONTAINS_SPACE.test(passwordInput.value)
+      ? validationMessage(
+          "vm-password-spaces",
+          "Password cannot contain spaces",
+          true,
+        )
       : validationMessage("vm-password-spaces", "", false);
   } else {
     validationMessage("vm-password-minlength", "", false);
@@ -175,17 +192,17 @@ profileUploadBtn.addEventListener("change", () => {
       console.log(`Image Size -> W: ${width}, H: ${height}`);
 
       if (
-        width >= PROFILE_MIN_WIDTH &&
-        width <= PROFILE_MAX_WIDTH &&
-        height >= PROFILE_MIN_HEIGHT &&
-        height <= PROFILE_MAX_HEIGHT
+        width >= Environment.PROFILE_MIN_WIDTH &&
+        width <= Environment.PROFILE_MAX_WIDTH &&
+        height >= Environment.PROFILE_MIN_HEIGHT &&
+        height <= Environment.PROFILE_MAX_HEIGHT
       ) {
         validationMessage("vm-image-size", "", false);
         console.log(imagefile);
       } else {
         validationMessage(
           "vm-image-size",
-          `Image height and width must be between ${PROFILE_MIN_HEIGHT}px and ${PROFILE_MAX_HEIGHT}px.`,
+          `Image height and width must be between ${Environment.PROFILE_MIN_HEIGHT}px and ${Environment.PROFILE_MAX_HEIGHT}px.`,
           true,
         );
         console.log("Invalid Image Size");
@@ -206,7 +223,8 @@ function validationMessage(id: string, message: string, appear: boolean) {
 
   if (appear) {
     if (!document.getElementById(id)) alertRedMessages.appendChild(element);
-    if (alertBox.classList.contains("hidden")) alertBox.classList.remove("hidden");
+    if (alertBox.classList.contains("hidden"))
+      alertBox.classList.remove("hidden");
     registerButton.disabled = true;
   } else {
     alertRedMessages.querySelector(`#${id}`)?.remove();
@@ -241,20 +259,23 @@ function sendData() {
   formData.append("email_address", $("#email").val() as string);
   formData.append("username", $("#username").val() as string);
   formData.append("password", $("#password").val() as string);
+  formData.append("confirm_password", $("#confirm_password").val() as string);
   formData.append("first_name", $("#first_name").val() as string);
   formData.append("last_name", $("#last_name").val() as string);
 
   if (imageFile) {
     formData.append("image", imageFile as Blob);
   } else {
-    const defaultImagePath = "assets/placeholders/profile_placeholder.png";
-    const defaultImageFile = new File([], defaultImagePath, { type: "image/png" });
+    const defaultImagePath = "../../assets/placeholders/account.png";
+    const defaultImageFile = new File([], defaultImagePath, {
+      type: "image/png",
+    });
     formData.append("image", defaultImageFile);
   }
 
   $.ajax({
     type: "POST",
-    url: "php/registration.php",
+    url: Routes.REGISTRATION_API,
     data: formData,
     processData: false,
     contentType: false,
@@ -290,32 +311,33 @@ function handleResponse(response: string) {
 
 function setModal(status: string, title: string, message: string) {
   const modal = document.getElementById("modal") as HTMLDialogElement;
-  const modalContainer = document.getElementById("modal-container") as HTMLDivElement;
+  const modalContainer = document.getElementById(
+    "modal-container",
+  ) as HTMLDivElement;
 
-  while (modalContainer.firstChild) {
-    modalContainer.removeChild(modalContainer.firstChild);
-  }
+  modalContainer.innerHTML = "";
 
   const modalIcon = document.createElement("i");
 
   switch (status) {
     case "error":
-      modalIcon.classList.add("fa-solid", "fa-circle-xmark", "text-4xl", "text-red-400");
+      modalIcon.className = "fa-solid fa-circle-xmark text-4xl text-red-400";
       break;
     case "warning":
-      modalIcon.classList.add("fa-solid", "fa-circle-exclamation", "text-4xl", "text-orange-400");
+      modalIcon.className =
+        "fa-solid fa-circle-exclamation text-4xl text-orange-400";
       break;
     case "success":
-      modalIcon.classList.add("fa-solid", "fa-circle-check", "text-4xl", "text-green-400");
+      modalIcon.className = "fa-solid fa-circle-check text-4xl text-green-400";
       break;
   }
 
   const modalTitle = document.createElement("h1");
-  modalTitle.classList.add("font-semibold", "text-2xl", "text-center", "text-neutral-500");
+  modalTitle.className = "font-semibold text-2xl text-center text-neutral-500";
   modalTitle.innerText = title;
 
   const modalMessage = document.createElement("p");
-  modalMessage.classList.add("text-center", "text-sm", "text-neutral-500");
+  modalMessage.className = "text-center text-sm text-neutral-500";
   modalMessage.innerText = message;
 
   modalContainer.appendChild(modalIcon);

@@ -1,8 +1,6 @@
-"use strict";
-const PROFILE_MIN_WIDTH = 200;
-const PROFILE_MIN_HEIGHT = 200;
-const PROFILE_MAX_WIDTH = 2048;
-const PROFILE_MAX_HEIGHT = 2048;
+import * as Environment from "../../scripts/env.js";
+import * as Routes from "../../scripts/routes.js";
+import * as RegEx from "../../scripts/regex.js";
 const profileUploadBtn = document.getElementById("profile_upload");
 const profilePlaceholder = document.getElementById("Profile_Placeholder");
 const alertBox = document.getElementById("alert-box");
@@ -16,8 +14,9 @@ const confirmPasswordInput = document.getElementById("confirm_password");
 const registerButton = document.getElementById("Register_Button");
 const homepageButton = document.getElementById("Homepage_Button");
 homepageButton.addEventListener("click", () => {
-    window.location.href = "index.html";
+    window.location.href = Routes.HOME_PAGE;
 });
+registerButton.addEventListener("click", sendData);
 emailInput.addEventListener("input", () => {
     if (!emailInput.validity.valid) {
         validationMessage("vm-email", "Please enter a valid email address.", true);
@@ -30,7 +29,7 @@ emailInput.addEventListener("input", () => {
 firstNameInput.addEventListener("input", checkAllInputs);
 lastNameInput.addEventListener("input", checkAllInputs);
 usernameInput.addEventListener("input", () => {
-    const pattern = /^[A-Za-z0-9_]+$/;
+    const pattern = /^\w+$/;
     if (!usernameInput.validity.valid) {
         usernameInput.value.length < usernameInput.minLength
             ? validationMessage("vm-username-minlength", `Username must have minimum of a ${usernameInput.minLength} characters.`, true)
@@ -55,11 +54,6 @@ usernameInput.addEventListener("input", () => {
     checkAllInputs();
 });
 passwordInput.addEventListener("input", () => {
-    const digitLookahead = /(?=.*\d)/;
-    const lowercaseLookahead = /(?=.*[a-z])/;
-    const uppercaseLookahead = /(?=.*[A-Z])/;
-    const specialLookahead = /(?=.*[!@#$%^&*])/;
-    const spaceLookahead = /\s/;
     if (!passwordInput.validity.valid) {
         passwordInput.value.length < passwordInput.minLength
             ? validationMessage("vm-password-minlength", `Password must have a minimum of ${passwordInput.minLength} characters`, true)
@@ -67,19 +61,19 @@ passwordInput.addEventListener("input", () => {
         passwordInput.value.length > passwordInput.maxLength
             ? validationMessage("vm-password-maxlength", `Password must not exceed ${passwordInput.maxLength}`, true)
             : validationMessage("vm-password-maxlength", "", false);
-        !digitLookahead.test(passwordInput.value)
+        !RegEx.REGEX_CONTAINS_DIGITS.test(passwordInput.value)
             ? validationMessage("vm-password-digits", "Password must contain at least one digit", true)
             : validationMessage("vm-password-digits", "", false);
-        !lowercaseLookahead.test(passwordInput.value)
+        !RegEx.REGEX_CONTAINS_LOWERCASE.test(passwordInput.value)
             ? validationMessage("vm-password-lowercase", "Password must contain at least one lowercase character", true)
             : validationMessage("vm-password-lowercase", "", false);
-        !uppercaseLookahead.test(passwordInput.value)
+        !RegEx.REGEX_CONTAINS_UPPERCASE.test(passwordInput.value)
             ? validationMessage("vm-password-uppercase", "Password must contain at least one uppercase character", true)
             : validationMessage("vm-password-uppercase", "", false);
-        !specialLookahead.test(passwordInput.value)
+        !RegEx.REGEX_CONTAINS_SPECIAL.test(passwordInput.value)
             ? validationMessage("vm-password-special", "Password must have atleast one special character (!@#$%^&*)", true)
             : validationMessage("vm-password-special", "", false);
-        spaceLookahead.test(passwordInput.value)
+        RegEx.REGEX_CONTAINS_SPACE.test(passwordInput.value)
             ? validationMessage("vm-password-spaces", "Password cannot contain spaces", true)
             : validationMessage("vm-password-spaces", "", false);
     }
@@ -113,15 +107,15 @@ profileUploadBtn.addEventListener("change", () => {
             const width = image.width;
             const height = image.height;
             console.log(`Image Size -> W: ${width}, H: ${height}`);
-            if (width >= PROFILE_MIN_WIDTH &&
-                width <= PROFILE_MAX_WIDTH &&
-                height >= PROFILE_MIN_HEIGHT &&
-                height <= PROFILE_MAX_HEIGHT) {
+            if (width >= Environment.PROFILE_MIN_WIDTH &&
+                width <= Environment.PROFILE_MAX_WIDTH &&
+                height >= Environment.PROFILE_MIN_HEIGHT &&
+                height <= Environment.PROFILE_MAX_HEIGHT) {
                 validationMessage("vm-image-size", "", false);
                 console.log(imagefile);
             }
             else {
-                validationMessage("vm-image-size", `Image height and width must be between ${PROFILE_MIN_HEIGHT}px and ${PROFILE_MAX_HEIGHT}px.`, true);
+                validationMessage("vm-image-size", `Image height and width must be between ${Environment.PROFILE_MIN_HEIGHT}px and ${Environment.PROFILE_MAX_HEIGHT}px.`, true);
                 console.log("Invalid Image Size");
             }
             profilePlaceholder.src = image.src;
@@ -171,19 +165,22 @@ function sendData() {
     formData.append("email_address", $("#email").val());
     formData.append("username", $("#username").val());
     formData.append("password", $("#password").val());
+    formData.append("confirm_password", $("#confirm_password").val());
     formData.append("first_name", $("#first_name").val());
     formData.append("last_name", $("#last_name").val());
     if (imageFile) {
         formData.append("image", imageFile);
     }
     else {
-        const defaultImagePath = "assets/placeholders/profile_placeholder.png";
-        const defaultImageFile = new File([], defaultImagePath, { type: "image/png" });
+        const defaultImagePath = "../../assets/placeholders/account.png";
+        const defaultImageFile = new File([], defaultImagePath, {
+            type: "image/png",
+        });
         formData.append("image", defaultImageFile);
     }
     $.ajax({
         type: "POST",
-        url: "php/registration.php",
+        url: Routes.REGISTRATION_API,
         data: formData,
         processData: false,
         contentType: false,
@@ -217,26 +214,25 @@ function handleResponse(response) {
 function setModal(status, title, message) {
     const modal = document.getElementById("modal");
     const modalContainer = document.getElementById("modal-container");
-    while (modalContainer.firstChild) {
-        modalContainer.removeChild(modalContainer.firstChild);
-    }
+    modalContainer.innerHTML = "";
     const modalIcon = document.createElement("i");
     switch (status) {
         case "error":
-            modalIcon.classList.add("fa-solid", "fa-circle-xmark", "text-4xl", "text-red-400");
+            modalIcon.className = "fa-solid fa-circle-xmark text-4xl text-red-400";
             break;
         case "warning":
-            modalIcon.classList.add("fa-solid", "fa-circle-exclamation", "text-4xl", "text-orange-400");
+            modalIcon.className =
+                "fa-solid fa-circle-exclamation text-4xl text-orange-400";
             break;
         case "success":
-            modalIcon.classList.add("fa-solid", "fa-circle-check", "text-4xl", "text-green-400");
+            modalIcon.className = "fa-solid fa-circle-check text-4xl text-green-400";
             break;
     }
     const modalTitle = document.createElement("h1");
-    modalTitle.classList.add("font-semibold", "text-2xl", "text-center", "text-neutral-500");
+    modalTitle.className = "font-semibold text-2xl text-center text-neutral-500";
     modalTitle.innerText = title;
     const modalMessage = document.createElement("p");
-    modalMessage.classList.add("text-center", "text-sm", "text-neutral-500");
+    modalMessage.className = "text-center text-sm text-neutral-500";
     modalMessage.innerText = message;
     modalContainer.appendChild(modalIcon);
     modalContainer.appendChild(modalTitle);

@@ -1,12 +1,8 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: ["./src/**/*.{html,js}", "./node_modules/flowbite/**/*.js"],
+  content: ["./**/*.{html,js}", "./node_modules/flowbite/**/*.js"],
   theme: {
     extend: {},
   },
-  plugins: [
-    require("tailwind-scrollbar"),
-    require("flowbite/plugin"),
-    
-  ],
+  plugins: [require("tailwind-scrollbar"), require("flowbite/plugin")],
 };
