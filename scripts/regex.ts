@@ -22,7 +22,7 @@ export const REGEX_PASSWORD: RegExp =
   /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])[^\\s].{7,65}$/;
 
 // Regular Expression for Usernames
-export const REGEX_USERNAME: RegExp = /^[a-zA-Z0-9]+$/;
+export const REGEX_USERNAME: RegExp = /^(?=[a-zA-Z_])[a-zA-Z0-9_]{7,20}$/;
 
 // Regular Expression for Phone Numbers
 export const REGEX_PHONE: RegExp =

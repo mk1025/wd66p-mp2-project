@@ -19,34 +19,6 @@ const spinner = document.getElementById("spinner") as HTMLDivElement;
 
 loginButton.addEventListener("click", login);
 
-$(function () {
-  let token = sessionStorage.getItem("token") ?? "";
-
-  const data = {
-    request: "login",
-    token: token,
-  };
-  $.ajax({
-    type: "POST",
-    url: Routes.LOGIN_API,
-    data: "session=" + JSON.stringify(data),
-    success: function (response) {
-      console.log("Successful Response: ", response);
-      let postResponse = JSON.parse(response);
-      if (postResponse.data.redirect) {
-        window.location.href = Routes.DASHBOARD_PAGE;
-      }
-    },
-    error: function (xhr, status, error) {
-      console.log("XHR Status: ", xhr.status);
-      console.log("XHR Text: ", xhr.responseText);
-      console.log("Status: ", status);
-      console.error("Error: ", error);
-      handleResponseData(JSON.parse(xhr.responseText));
-    },
-  });
-});
-
 function login() {
   const credential = credentialInput.value;
   const password = passwordInput.value;
@@ -96,7 +68,7 @@ function sendRequest() {
   spinner.classList.add("hidden");
 }
 
-function handleResponseData(data: any) {
+export default function handleResponseData(data: any) {
   sessionStorage.setItem("token", data.data.token ?? "");
   if (data.status === 400) {
     alertMessage(true, data.message);

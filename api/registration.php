@@ -25,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === "POST") {
     if (validateData($postData)) {
         createNewUser($postData);
     }
-
+    $connection->close();
     exit();
 }
 
@@ -68,12 +68,14 @@ function createNewUser($data)
 {
     global $connection;
 
-    if (queryOneData(TBL_USERS, "email", strtolower($data['email_address']))) {
-        echo createResponse(401, "Registration Error", "Email already exists", "", "");
+    if (queryOneRowCount(TBL_USERS, "email", strtolower($data['email_address']))) {
+        echo createResponse(400, "Registration Error", "Email already exists", "", "");
+        $connection->close();
         exit();
     }
-    if (queryOneData(TBL_USERS, "username", strtolower($data['username']))) {
-        echo createResponse(401, "Registration Error", "Username already exists", "", "");
+    if (queryOneRowCount(TBL_USERS, "username", strtolower($data['username']))) {
+        echo createResponse(400, "Registration Error", "Username already exists", "", "");
+        $connection->close();
         exit();
     }
 
@@ -81,7 +83,7 @@ function createNewUser($data)
     $insertData = array(
         "email_address" => strtolower($data['email_address']),
         "username" => strtolower($data['username']),
-        "password" => password_hash($data['password'], PASSWORD_ARGON2I),
+        "password" => password_hash($data['password'], PASSWORD_DEFAULT),
         "first_name" => ucwords($data['first_name']),
         "last_name" => ucwords($data['last_name'])
     );
@@ -95,7 +97,7 @@ function createNewUser($data)
         $targetDirectory = "uploads/";
 
         if (!is_dir($targetDirectory)) {
-            mkdir($targetDirectory, 0755, true);
+            mkdir($targetDirectory, 0700, true);
         }
 
 
@@ -107,6 +109,8 @@ function createNewUser($data)
             $stmt->execute();
             $result = $stmt->get_result();
         } while ($result->num_rows > 0);
+
+
 
         $targetFilePath = $targetDirectory . $insertData['uid'] . "." . $fileExtension;
 
@@ -139,18 +143,26 @@ function createNewUser($data)
 
             if ($stmt->execute()) {
                 echo createResponse(201, "Registration Complete", "Log In from the Homepage", "", "");
+                $stmt->close();
+                $connection->close();
                 exit();
             } else {
                 echo createResponse(400, "Registration Error", "Internal Server Error", $stmt->error, "");
+                $stmt->close();
+                $connection->close();
                 exit();
             }
         } else {
-            echo createResponse(400, "Registration Error", "Internal Server Error", "Image Upload Error", "");
+            echo createResponse(400, "Registration Error", "Internal Server Error", "Image Relocation Failed", "");
+            $stmt->close();
+            $connection->close();
             exit();
         }
 
     } else {
         echo createResponse(400, "Registration Error", "Internal Server Error", "", "");
+        $connection->close();
+        exit();
     }
 
 

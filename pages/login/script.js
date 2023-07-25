@@ -6,33 +6,6 @@ const loginButton = document.getElementById("login_button");
 const login_alert = document.getElementById("alert");
 const spinner = document.getElementById("spinner");
 loginButton.addEventListener("click", login);
-$(function () {
-    var _a;
-    let token = (_a = sessionStorage.getItem("token")) !== null && _a !== void 0 ? _a : "";
-    const data = {
-        request: "login",
-        token: token,
-    };
-    $.ajax({
-        type: "POST",
-        url: Routes.LOGIN_API,
-        data: "session=" + JSON.stringify(data),
-        success: function (response) {
-            console.log("Successful Response: ", response);
-            let postResponse = JSON.parse(response);
-            if (postResponse.data.redirect) {
-                window.location.href = Routes.DASHBOARD_PAGE;
-            }
-        },
-        error: function (xhr, status, error) {
-            console.log("XHR Status: ", xhr.status);
-            console.log("XHR Text: ", xhr.responseText);
-            console.log("Status: ", status);
-            console.error("Error: ", error);
-            handleResponseData(JSON.parse(xhr.responseText));
-        },
-    });
-});
 function login() {
     const credential = credentialInput.value;
     const password = passwordInput.value;
@@ -76,7 +49,7 @@ function sendRequest() {
     });
     spinner.classList.add("hidden");
 }
-function handleResponseData(data) {
+export default function handleResponseData(data) {
     var _a;
     sessionStorage.setItem("token", (_a = data.data.token) !== null && _a !== void 0 ? _a : "");
     if (data.status === 400) {

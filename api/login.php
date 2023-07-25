@@ -9,16 +9,30 @@ if (isset($_POST['login'])) {
 
 
     if (
-        !queryOneData(TBL_USERS, "email", strtolower($postData->credential)) &&
-        !queryOneData(TBL_USERS, "username", strtolower($postData->credential))
+        !queryOneRowCount(TBL_USERS, "email", strtolower($postData->credential)) &&
+        !queryOneRowCount(TBL_USERS, "username", strtolower($postData->credential))
     ) {
-        returnResponse(400, "Login Error", "Account does not exist", "Account does not exist", "");
+        echo createResponse(400, "Login Error", "Account does not exist", "Account does not exist", "");
+        $connection->close();
+        exit();
     }
 
     if (verifyPassword(TBL_USERS, strtolower($postData->credential), $postData->password)) {
-        $_SESSION["user"] = $postData->credential;
+        $query = "SELECT * FROM users WHERE email = '" . strtolower($postData->credential) . "' OR username = '" . strtolower($postData->credential) . "'";
+        $result = $connection->query($query);
+        $user = $result->fetch_assoc();
+
+        $_SESSION["uid"] = $user["uid"];
+
+        if (!$_SESSION["uid"]) {
+            echo createResponse(400, "Login Error", "Internal Server Error", "Incorrect password", "");
+            session_destroy();
+            $connection->close();
+            exit();
+        }
+
         $data = array(
-            "token" => hash("sha256", $postData->credential),
+            "token" => hash("sha256", $_SESSION["uid"]),
             "redirect" => true
         );
 
@@ -30,20 +44,4 @@ if (isset($_POST['login'])) {
     }
 }
 
-if (isset($_POST['session']) && isset($_SESSION["user"])) {
-    $postData = json_decode($_POST['session']);
-
-    if (hash("sha256", $_SESSION["user"]) == $postData->token) {
-        $data = array(
-            "redirect" => true
-        );
-        echo createResponse(200, "Token Verified", "", "", $data);
-        exit();
-    } else {
-        echo createResponse(401, "Redirect Error", "Incorrect token", "Incorrect token", "");
-        exit();
-    }
-} else {
-    echo createResponse(401, "Redirect Error", "No token", "No token", "");
-    exit();
-}
+include_once "session.php";
