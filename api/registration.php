@@ -143,6 +143,48 @@ function createNewUser($data)
 
             if ($stmt->execute()) {
                 echo createResponse(201, "Registration Complete", "Log In from the Homepage", "", "");
+
+                $newUID = "";
+
+                do {
+                    $newUID = generateUID(6) . "-" . generateUID(6);
+                    $checkUIDSQL = "SELECT * FROM " . TBL_TRANSMUTATIONS . " WHERE uid = ?";
+                    $stmt = $connection->prepare($checkUIDSQL);
+                    $stmt->bind_param("s", $newUID);
+                    $stmt->execute();
+                    $result = $stmt->get_result();
+                } while ($result->num_rows > 0);
+
+                $defaultName = "Default";
+                $defaultLowest = 60;
+                $defaultPassing = 75;
+                $defaultHighest = 100;
+
+                $query = "INSERT INTO " . TBL_TRANSMUTATIONS . " (
+                    teacher_uid,
+                    uid,
+                    name,
+                    lowest,
+                    passing,
+                    highest,
+                    created_at,
+                    updated_at
+                ) VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW());";
+
+                $stmt = $connection->prepare($query);
+                $stmt->bind_param(
+                    "ssssss",
+                    $insertData['uid'],
+                    $newUID,
+                    $defaultName,
+                    $defaultLowest,
+                    $defaultPassing,
+                    $defaultHighest
+                );
+
+                $stmt->execute();
+
+
                 $stmt->close();
                 $connection->close();
                 exit();
