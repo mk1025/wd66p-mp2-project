@@ -11,13 +11,18 @@ if (isset($_POST['session']) && isset($_SESSION["uid"])) {
         $data = array(
             "redirect" => true
         );
+        http_response_code(200);
         echo createResponse(200, "Token Verified", "", "", $data);
         exit();
     } else {
-        echo createResponse(401, "Redirect Error", "Incorrect token", "Incorrect token", "");
+        http_response_code(404);
+        echo createResponse(404, "Redirect Error", "Incorrect token", "Incorrect token", "");
+        session_destroy();
         exit();
     }
 } else {
-    echo createResponse(401, "Redirect Error", "No token", "No token", "");
+    http_response_code(404);
+    echo createResponse(404, "Redirect Error", "No token", "No token", "");
+    session_destroy();
     exit();
 }
