@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   $.ajax({
     type: "POST",
-    url: Routes.CLASSRECORDS_API,
+    url: Routes.LOGIN_API,
     data: "session=" + JSON.stringify(data),
     success: function (response) {
       console.log("Successful Response: ", JSON.parse(response) || response);
@@ -18,10 +18,12 @@ document.addEventListener("DOMContentLoaded", function () {
     },
     error: function (xhr, status, error) {
       document.getElementById("Site-Spinner")?.classList.remove("hidden");
+      console.group("Token Errors:");
       console.error("(Error) XHR Status: ", xhr.status);
       console.error("(Error) XHR Text: ", xhr.responseText);
       console.error("(Error) Status: ", status);
       console.error("Error: ", error);
+      console.groupEnd();
       if (error) window.location.href = Routes.LOGIN_PAGE;
     },
   });
