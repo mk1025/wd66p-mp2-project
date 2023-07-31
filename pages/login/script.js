@@ -59,7 +59,7 @@ export default function handleResponseData(data) {
         window.location.href = Routes.HOME_PAGE;
     }
     if (data.data.redirect) {
-        window.location.href = Routes.DASHBOARD_PAGE;
+        window.location.href = Routes.CLASSRECORDS_PAGE;
     }
 }
 login_ExitButton.addEventListener("click", () => {

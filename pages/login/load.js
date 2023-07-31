@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", function () {
             console.log("Successful Response: ", response);
             let postResponse = JSON.parse(response);
             if (postResponse.data.redirect) {
-                window.location.href = Routes.DASHBOARD_PAGE;
+                window.location.href = Routes.CLASSRECORDS_PAGE;
             }
         },
         error: function (xhr, status, error) {

@@ -77,7 +77,7 @@ export default function handleResponseData(data: any) {
     window.location.href = Routes.HOME_PAGE;
   }
   if (data.data.redirect) {
-    window.location.href = Routes.DASHBOARD_PAGE;
+    window.location.href = Routes.CLASSRECORDS_PAGE;
   }
 }
 
