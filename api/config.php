@@ -97,7 +97,7 @@ $query = "SHOW TABLES LIKE '" . TBL_TRANSMUTATIONS . "'";
 $result = $connection->query($query);
 
 if ($result->num_rows === 0) {
-    $createTableSQL = "CREATE TABLE transmutations (
+    $createTableSQL = "CREATE TABLE " . TBL_TRANSMUTATIONS . " (
         `key` INT(11) AUTO_INCREMENT PRIMARY KEY,
         teacher_uid VARCHAR(13) NOT NULL,
         uid VARCHAR(13) NOT NULL UNIQUE,
@@ -122,7 +122,7 @@ $query = "SHOW TABLES LIKE '" . TBL_RECORDS . "'";
 $result = $connection->query($query);
 
 if ($result->num_rows === 0) {
-    $createTableSQL = "CREATE TABLE classrecords (
+    $createTableSQL = "CREATE TABLE " . TBL_RECORDS . " (
         `key` INT(11) AUTO_INCREMENT PRIMARY KEY,
         teacher_uid VARCHAR(13) NOT NULL,
         section_id VARCHAR(13) NOT NULL,
@@ -144,11 +144,11 @@ if ($result->num_rows === 0) {
     }
 }
 
-$query = "SHOW TABLES LIKE '" . TBL_COMPONENTS . "'";
+$query = "SHOW TABLES LIKE '" . TBL_RECORDS_COMPONENTS . "'";
 $result = $connection->query($query);
 
 if ($result->num_rows === 0) {
-    $createTableSQL = "CREATE TABLE components (
+    $createTableSQL = "CREATE TABLE " . TBL_RECORDS_COMPONENTS . " (
         `key` INT(11) AUTO_INCREMENT PRIMARY KEY,
         record_id VARCHAR(13) NOT NULL,
         uid VARCHAR(13) NOT NULL UNIQUE,
@@ -172,7 +172,7 @@ $query = "SHOW TABLES LIKE '" . TBL_ACTIVITIES . "'";
 $result = $connection->query($query);
 
 if ($result->num_rows === 0) {
-    $createTableSQL = "CREATE TABLE activities (
+    $createTableSQL = "CREATE TABLE " . TBL_ACTIVITIES . " (
         `key` INT(11) AUTO_INCREMENT PRIMARY KEY,
         component_id VARCHAR(13) NOT NULL,
         uid VARCHAR(13) NOT NULL UNIQUE,
@@ -191,6 +191,58 @@ if ($result->num_rows === 0) {
         exit();
     }
 }
+
+$query = "SHOW TABLES LIKE '" . TBL_ACTIVITIES_COMPONENTS . "'";
+$result = $connection->query($query);
+
+if ($result->num_rows === 0) {
+    $createTableSQL = "CREATE TABLE " . TBL_ACTIVITIES_COMPONENTS . " (
+        `key` INT(11) AUTO_INCREMENT PRIMARY KEY,
+        activity_id VARCHAR(13) NOT NULL,
+        uid VARCHAR(13) NOT NULL UNIQUE,
+        component_name VARCHAR(255) NOT NULL,
+        component_type VARCHAR(255) NOT NULL,
+        score INT(11) NOT NULL,
+        bonus BOOLEAN DEFAULT FALSE NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (activity_id) REFERENCES activities(uid)
+    ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci";
+
+    if (!$connection->query($createTableSQL)) {
+        http_response_code(400);
+        echo createResponse(400, "DB Connection Error", "Server DB Connection Error", $connection->connect_error, "");
+        $connection->close();
+        exit();
+    }
+}
+
+$query = "SHOW TABLES LIKE '" . TBL_STUDENTS_ACTIVITIES . "'";
+$result = $connection->query($query);
+
+if ($result->num_rows === 0) {
+    $createTableSQL = "CREATE TABLE " . TBL_STUDENTS_ACTIVITIES . " (
+        `key` INT(11) AUTO_INCREMENT PRIMARY KEY,
+        student_id VARCHAR(13) NOT NULL,
+        activity_id VARCHAR(13) NOT NULL,
+        component_id VARCHAR(13) NOT NULL,
+        score INT(11) DEFAULT 0 NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (student_id) REFERENCES students(uid),
+        FOREIGN KEY (activity_id) REFERENCES activities(uid),
+        FOREIGN KEY (component_id) REFERENCES activities_components(uid)
+    ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci";
+
+    if (!$connection->query($createTableSQL)) {
+        http_response_code(400);
+        echo createResponse(400, "DB Connection Error", "Server DB Connection Error", $connection->connect_error, "");
+        $connection->close();
+        exit();
+    }
+}
+
+
 
 
 
