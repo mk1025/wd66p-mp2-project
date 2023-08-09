@@ -9,6 +9,7 @@ module.exports = {
       "./pages/classrecords/script.ts",
       "./pages/classrecords/load.ts",
     ],
+    viewrecord: ["./pages/viewrecord/script.ts"],
   },
   output: {
     filename: "[name].bundle.js", // Output filename based on entry point name
