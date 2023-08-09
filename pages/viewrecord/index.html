@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GradeMate: View Record</title>
+
+    <link
+      rel="shortcut icon"
+      href="../../assets/favicon/favicon.ico"
+      type="image/x-icon"
+    />
+    <link rel="stylesheet" href="../../styles/styles.css" />
+    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
+    <script
+      src="https://kit.fontawesome.com/7369d6167e.js"
+      crossorigin="anonymous"
+    ></script>
+    <script src="../../node_modules/jquery/dist/jquery.min.js"></script>
+
+    <script src="../../dist/viewrecord.bundle.js" defer></script>
+  </head>
+  <body class="">
+    <!-- BIG ASS SPINNER -->
+    <div id="Site-Spinner" class="absolute w-screen h-screen z-[100]">
+      <div
+        class="flex flex-col gap-5 items-center w-full h-full justify-center bg-white"
+      >
+        <i class="fa-solid fa-circle-notch fa-spin text-6xl text-blue-500"></i>
+        <span>Please wait for a moment...</span>
+      </div>
+    </div>
+    <!-- BIG ASS SPINNER (END) -->
+    <!-- ACTION SPINNER -->
+    <div id="Action-Spinner" class="hidden absolute w-screen h-screen z-[90]">
+      <div
+        class="flex flex-col bg-slate-500 bg-opacity-50 gap-5 items-center w-full h-full justify-center"
+      >
+        <div class="bg-white w-max h-max p-20 rounded text-4xl text-blue-500">
+          <i class="fa-solid fa-circle-notch fa-spin"></i>
+        </div>
+      </div>
+    </div>
+    <!-- ACTION SPINNER (END) -->
+
+    <!-- MODALS -->
+    <!-- Activity Modal -->
+    <div
+      id="ActivityModal"
+      tabindex="-1"
+      aria-hidden="true"
+      data-modal-backdrop="static"
+      class="fixed top-0 left-0 right-0 z-50 hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full"
+    >
+      <div class="relative w-full max-w-2xl max-h-full">
+        <!-- Modal content -->
+        <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+          <!-- Modal header -->
+          <div
+            class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600"
+          >
+            <h3
+              id="ActivityModalTitle"
+              class="text-xl font-semibold text-gray-900 dark:text-white"
+            >
+              Add New Class Record
+            </h3>
+            <button
+              id="ActivityModalCloseButton"
+              type="button"
+              class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
+              data-modal-hide="ActivityModal"
+            >
+              <i class="fa-regular fa-circle-xmark text-xl"></i>
+              <span class="sr-only">Close modal</span>
+            </button>
+          </div>
+          <!-- Modal body -->
+          <div class="p-6 space-y-6">
+            <!-- Modal Content -->
+            <div class="mb-6">
+              <label for="ActivityModalName">Class Record Name: </label>
+              <input
+                type="text"
+                name="ActivityModalNameInput"
+                id="ActivityModalNameInput"
+                class="w-full rounded-lg"
+              />
+            </div>
+          </div>
+          <!-- Modal footer -->
+          <div
+            class="flex items-center p-6 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600"
+          >
+            <button
+              id="ActivityModalButton"
+              data-modal-hide="ActivityModal"
+              type="button"
+              class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+            >
+              Save
+            </button>
+            <button
+              id="ActivityModalCancelButton"
+              data-modal-hide="ActivityModal"
+              type="button"
+              class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-600"
+            >
+              Cancel
+            </button>
+            <div id="ActivityModalSpinner" role="status" class="hidden">
+              <svg
+                aria-hidden="true"
+                class="w-8 h-8 mr-2 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600"
+                viewBox="0 0 100 101"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
+                  fill="currentColor"
+                />
+                <path
+                  d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
+                  fill="currentFill"
+                />
+              </svg>
+              <span class="sr-only">Loading...</span>
+            </div>
+            <div
+              id="ActivityModalAlert"
+              class="hidden bg-red-400 py-1 px-2 rounded-lg text-white font-medium text-sm"
+            >
+              <i class="fa-solid fa-circle-exclamation mr-2"></i>
+              <span id="ActivityModalAlertText">Error</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Activity Modal (END) -->
+    <!-- Error Modal -->
+    <div
+      id="ErrorModal"
+      tabindex="-1"
+      class="fixed top-0 left-0 right-0 z-50 hidden p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full"
+    >
+      <div class="relative w-full max-w-md max-h-full">
+        <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+          <button
+            id="ErrorModalCloseButton"
+            type="button"
+            class="absolute top-3 right-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
+            data-modal-hide="ErrorModal"
+          >
+            <svg
+              class="w-3 h-3"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 14 14"
+            >
+              <path
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
+              />
+            </svg>
+            <span class="sr-only">Close modal</span>
+          </button>
+          <div class="p-6 text-center">
+            <svg
+              class="mx-auto mb-4 text-red-400 w-12 h-12 dark:text-red-400"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 20 20"
+            >
+              <path
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M10 11V6m0 8h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+              />
+            </svg>
+            <h3
+              id="ErrorModalText"
+              class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400"
+            >
+              ???
+            </h3>
+
+            <button
+              id="ErrorModalOkayButton"
+              data-modal-hide="ErrorModal"
+              type="button"
+              class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-600"
+            >
+              Okay
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Error Modal (END) -->
+    <!-- MODALS (END) -->
+
+    <!-- HEADER -->
+    <header
+      class="w-screen h-max top-0 p-2 bg-white border-b border-b-neutral-300 shadow overflow-hidden"
+    >
+      <nav class="m-2 text-white font-medium w-full">
+        <button
+          id="ExitButton"
+          class="py-2 px-3 rounded-s-3xl rounded-e bg-red-400 shadow hover:bg-red-600"
+        >
+          <i class="fa-solid fa-person-running mr-2"></i>
+          Exit
+        </button>
+        <button class="py-2 px-3 rounded bg-blue-400 shadow hover:bg-blue-600">
+          <i class="fa-solid fa-gear mr-2"></i>
+          Edit Class Record
+        </button>
+      </nav>
+      <section
+        id="ClassRecordDetails"
+        class="bg-green-500 w-full flex flex-row flex-wrap items-end justify-center text-center gap-2"
+      >
+        <h1 id="" class="font-bold text-4xl w-full text-blue-500 drop-shadow">
+          Class Record Name
+        </h1>
+        <h2 id="" class="font-medium text-2xl text-blue-400">Section Name</h2>
+        <h3 id="" class="font-medium text-md text-neutral-500">
+          S.Y. August 29, 2023 - July 1, 2024
+        </h3>
+      </section>
+    </header>
+
+    <!-- COMPONENTS LIST -->
+    <main
+      id="ComponentsList"
+      class="w-screen p-5 flex flex-col gap-5 overflow-auto"
+    >
+      <!-- Sample Component -->
+      <div class="w-max">
+        <header
+          class="w-full bg-blue-500 text-white p-5 flex flex-row gap-2 items-center rounded-t sticky"
+        >
+          <div
+            class="w-max px-2 text-md text-blue-500 text-center bg-white rounded-full font-medium"
+          >
+            25%
+          </div>
+          <h1 class="font-bold flex-grow">Component Name</h1>
+          <button
+            onclick="this.parentNode.nextElementSibling.classList.toggle('hidden')"
+            class="px-3 py-1 font-medium text-sm bg-inherit hover:bg-white hover:text-blue-500 rounded whitespace-nowrap"
+          >
+            Hide Table <i class="fa-solid fa-table-columns ml-2"></i>
+          </button>
+        </header>
+        <table
+          class="w-full table-auto border-2 border-blue-500 rounded-b bg-white whitespace-nowrap"
+        >
+          <thead class="">
+            <tr class="uppercase bg-blue-500 font-semibold text-white">
+              <th rowspan="2" scope="col" class="px-6 py-3 align-bottom">ID</th>
+              <th rowspan="2" scope="col" class="px-6 py-3 align-bottom">
+                Gender
+              </th>
+              <th rowspan="2" scope="col" class="px-6 py-3 align-bottom">
+                Last Name
+              </th>
+              <th rowspan="2" scope="col" class="px-6 py-3 align-bottom">
+                First Name
+              </th>
+              <th scope="col" class="px-6 py-3 text-center" colspan="4">
+                Activities
+              </th>
+              <th scope="col" class="px-6 py-3 text-center">Total Score</th>
+              <th scope="col" class="px-6 py-3 text-center">
+                Percentage Score
+              </th>
+              <th scope="col" class="px-6 py-3 text-center">Weighted Score</th>
+            </tr>
+            <tr class="bg-none font-medium text-center bg-blue-100">
+              <th scope="col" class="px-6 py-3 border-x border-x-neutral-400">
+                <button
+                  class="group w-11 h-11 border border-green-400 text-white bg-green-400 hover:bg-green-500 rounded"
+                >
+                  <span class="group-hover:hidden">26</span>
+                  <span class="hidden group-hover:inline"
+                    ><i class="fa-solid fa-pen"></i
+                  ></span>
+                </button>
+              </th>
+              <th scope="col" class="px-6 py-3 border-x border-x-neutral-400">
+                <button
+                  class="group w-11 h-11 border-2 border-neutral-500 text-neutral-500 rounded hover:bg-neutral-400 hover:text-white"
+                >
+                  26
+                </button>
+              </th>
+              <th scope="col" class="px-6 py-3 border-x border-x-neutral-400">
+                <button
+                  class="group w-11 h-11 border-2 border-neutral-500 text-neutral-500 rounded hover:bg-neutral-400 hover:text-white"
+                >
+                  26
+                </button>
+              </th>
+              <!-- Reserved -->
+              <th scope="col" class="px-6 py-3 border-x border-x-neutral-400">
+                <button
+                  class="border-2 border-green-400 text-green-400 hover:text-white hover:bg-green-400 py-2 px-3 rounded"
+                >
+                  <i class="fa-solid fa-plus"></i>
+                </button>
+              </th>
+              <th
+                scope="col"
+                class="py-3 border-x border-x-neutral-400 font-bold text-lg"
+              >
+                150
+              </th>
+              <th
+                scope="col"
+                class="py-3 border-x border-x-neutral-400 font-bold text-lg"
+              >
+                100 %
+              </th>
+              <th
+                scope="col"
+                class="py-3 border-x border-x-neutral-400 font-bold text-lg"
+              >
+                25 %
+              </th>
+            </tr>
+          </thead>
+          <tbody class="text-md text-neutral-500 font-medium">
+            <tr>
+              <td class="px-6 py-3 font-mono text-neutral-400">
+                ABCDEF-ABCDEF
+              </td>
+              <td class="px-6 py-3 text-blue-500">
+                <i class="fa-solid fa-mars"></i> Male
+              </td>
+              <td class="px-6 py-3 uppercase font-medium text-black">Alueta</td>
+              <td class="px-6 py-3">Mark Roland</td>
+              <td class="px-6 py-3 text-center border-x border-x-neutral-400">
+                <button
+                  class="group px-2 py-1 border border-neutral-400 text-neutral-400 rounded hover:bg-neutral-400 hover:text-white"
+                >
+                  <span class="group-hover:hidden">24</span>
+                  <span class="hidden group-hover:inline"
+                    ><i class="fa-solid fa-pen"></i
+                  ></span>
+                </button>
+              </td>
+              <td class="px-6 py-3 text-center border-x border-x-neutral-400">
+                24
+              </td>
+              <td class="px-6 py-3 text-center border-x border-x-neutral-400">
+                24
+              </td>
+              <td
+                class="px-6 py-3 text-center border-x border-x-neutral-400"
+              ></td>
+              <td
+                class="px-6 py-3 text-center border-x border-x-neutral-400 font-semibold"
+              >
+                24 / 150
+              </td>
+              <td
+                class="px-6 py-3 text-center border-x border-x-neutral-400 font-semibold"
+              >
+                84.67 %
+              </td>
+              <td
+                class="px-6 py-3 text-center border-x border-x-neutral-400 font-semibold"
+              >
+                19.45 %
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Final Grade -->
+      <div class="w-max">
+        <header
+          class="w-full bg-gray-500 text-white p-5 flex flex-row gap-2 items-center rounded-t sticky"
+        >
+          <div
+            class="w-max px-2 text-md text-gray-500 text-center bg-white rounded-full font-medium"
+          >
+            100%
+          </div>
+          <h1 class="font-bold">Final Grade</h1>
+          <div class="flex-grow flex flex-row items-center justify-end">
+            <button
+              onclick="this.parentNode.parentNode.nextElementSibling.classList.toggle('hidden')"
+              class="px-3 py-1 font-medium text-sm bg-inherit hover:bg-white hover:text-gray-500 rounded whitespace-nowrap"
+            >
+              Hide Table <i class="fa-solid fa-table-columns ml-2"></i>
+            </button>
+          </div>
+        </header>
+        <table
+          class="w-full table-auto border-2 border-gray-500 rounded-b bg-white whitespace-nowrap"
+        >
+          <thead class="">
+            <tr class="bg-gray-500 text-white uppercase">
+              <th
+                rowspan="3"
+                scope="col"
+                class="px-6 py-3 align-bottom text-center"
+              >
+                ID
+              </th>
+              <th rowspan="3" scope="col" class="px-6 py-3 align-bottom">
+                Gender
+              </th>
+              <th rowspan="3" scope="col" class="px-6 py-3 align-bottom">
+                Last Name
+              </th>
+              <th rowspan="3" scope="col" class="px-6 py-3 align-bottom">
+                First Name
+              </th>
+              <th scope="col" class="px-6 py-3 text-center" colspan="3">
+                Components
+              </th>
+              <th scope="col" colspan="3" class="px-6 py-3"></th>
+            </tr>
+            <tr class="bg-gray-100 text-gray-500 text-center">
+              <th scope="col" class="px-6 py-2 border-x border-x-neutral-400">
+                Written Works
+              </th>
+              <th scope="col" class="px-6 py-2 border-x border-x-neutral-400">
+                Performance Works
+              </th>
+              <th scope="col" class="px-6 py-2 border-x border-x-neutral-400">
+                Exam
+              </th>
+              <th scope="col" class="px-6 py-2 bg-gray-500 text-white">
+                TOTAL PERCENTAGE
+              </th>
+              <th scope="col" class="px-6 py-2 bg-gray-500 text-white">
+                TRANSMUTATED
+              </th>
+              <th scope="col" class="px-6 py-2 bg-gray-500 text-white"></th>
+            </tr>
+            <tr class="text-gray-500 text-center text-lg bg-gray-100">
+              <th scope="col" class="px-6 py-2 border-x border-x-neutral-400">
+                25%
+              </th>
+              <th scope="col" class="px-6 py-2 border-x border-x-neutral-400">
+                50%
+              </th>
+              <th scope="col" class="px-6 py-2 border-x border-x-neutral-400">
+                25%
+              </th>
+              <th
+                scope="col"
+                class="px-6 py-2 border-x border-x-neutral-400 text-black text-xl"
+              >
+                100%
+              </th>
+              <th
+                scope="col"
+                class="px-6 py-2 border-x border-x-neutral-400 text-black text-2xl"
+              >
+                <span class="text-red-500">60%</span>
+                <i class="fa-solid fa-right-long"></i>
+                <span class="text-amber-500">75%</span>
+                <i class="fa-solid fa-right-long"></i>
+                <span class="text-green-500">100%</span>
+              </th>
+              <th scope="col" class="px-6 py-2 bg-gray-500 text-white">
+                REMARKS
+              </th>
+            </tr>
+          </thead>
+          <tbody class="text-md text-neutral-500 font-medium">
+            <tr>
+              <td class="px-6 py-3 font-mono text-neutral-400">
+                ABCDEF-ABCDEF
+              </td>
+              <td class="px-6 py-3 text-blue-500">
+                <i class="fa-solid fa-mars"></i> Male
+              </td>
+              <td class="px-6 py-3 uppercase font-medium text-black">Alueta</td>
+              <td class="px-6 py-3">Mark Roland</td>
+              <!-- DATA -->
+              <td
+                class="px-6 py-3 border-x border-x-neutral-400 text-center text-gray-400"
+              >
+                14.15%
+              </td>
+              <td
+                class="px-6 py-3 border-x border-x-neutral-400 text-center text-gray-400"
+              >
+                34.15%
+              </td>
+              <td
+                class="px-6 py-3 border-x border-x-neutral-400 text-center text-gray-400"
+              >
+                14.15%
+              </td>
+              <td
+                class="px-6 py-3 border-x border-x-neutral-400 text-center text-gray-400 text-lg"
+              >
+                90%
+              </td>
+              <td
+                class="px-6 py-3 border-x border-x-neutral-400 text-center text-gray-400 text-xl"
+              >
+                80%
+              </td>
+              <td
+                class="px-6 py-3 border-x border-x-neutral-400 text-center text-green-400 text-xl"
+              >
+                PASSED
+              </td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr>
+              <td>Tfoot</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </main>
+    <!-- SCRIPTS -->
+    <!-- <script src="../../node_modules/flowbite/dist/flowbite.min.js"></script> -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.7.0/datepicker.min.js"></script>
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+    <script>
+      AOS.init();
+    </script>
+  </body>
+</html>
