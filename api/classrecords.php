@@ -12,8 +12,25 @@ if (isset($_POST['session']) && isset($_SESSION["uid"])) {
     $postData = json_decode($_POST['session']);
 
     if (hash("sha256", $_SESSION["uid"]) == $postData->token) {
+
+        $query = "SELECT first_name as firstName, last_name as lastName, image_path as imagePath FROM " . TBL_USERS . "  WHERE uid = ?";
+        $stmt = $connection->prepare($query);
+        $stmt->bind_param("s", $_SESSION["uid"]);
+        $stmt->execute();
+
+        $result = $stmt->get_result();
+
+        $result = $result->fetch_all(MYSQLI_ASSOC);
+
+        $stmt->close();
+
         $data = array(
-            "redirect" => true
+            "redirect" => true,
+            "user" => array(
+                "firstName" => ucwords($result[0]["firstName"]),
+                "lastName" => ucwords($result[0]["lastName"]),
+                "imagePath" => $result[0]["imagePath"]
+            )
         );
         echo createResponse(200, "Token Verified", "", "", $data);
         exit();
@@ -50,8 +67,8 @@ if (isset($_GET['populateRecords'])) {
     $getData = json_decode($_GET['populateRecords']);
 
     if (hash("sha256", $_SESSION["uid"]) !== $getData->token) {
-        http_response_code(404);
-        echo createResponse(404, "Redirect Error", "Incorrect token", "Incorrect token", "");
+        http_response_code(403);
+        echo createResponse(403, "Redirect Error", "Incorrect token", "Incorrect token", "");
         session_destroy();
         exit();
     }
@@ -157,7 +174,7 @@ if (isset($_GET['populateRecords'])) {
             ];
 
 
-            $queryComponents = "SELECT uid as id, component_name, score FROM " . TBL_COMPONENTS . " WHERE record_id = ?";
+            $queryComponents = "SELECT uid as id, component_name, score FROM " . TBL_RECORDS_COMPONENTS . " WHERE record_id = ?";
             $stmt = $connection->prepare($queryComponents);
             $stmt->bind_param("s", $record["id"]);
             $stmt->execute();
@@ -211,6 +228,7 @@ if (isset($_GET['populateRecords'])) {
 
 
 
+// RECORDS
 
 if (isset($_POST['addRecord'])) {
     /*
@@ -232,11 +250,65 @@ if (isset($_POST['addRecord'])) {
     $postData = json_decode($_POST['addRecord']);
 
     if (hash("sha256", $_SESSION["uid"]) !== $postData->token) {
-        http_response_code(404);
-        echo createResponse(404, "Redirect Error", "Incorrect token", "Incorrect token", "");
+        http_response_code(403);
+        echo createResponse(403, "Page Error", "Forbidden Access to Page", "", "");
         session_destroy();
         exit();
     }
+
+    if ($postData->name === "") {
+        http_response_code(400);
+        echo createResponse(400, "Create Record Error", "Class Record Name cannot be empty", "Name cannot be empty", "");
+        exit();
+    }
+    if ($postData->section === "") {
+        http_response_code(400);
+        echo createResponse(400, "Create Record Error", "Class Record Section cannot be empty", "Section cannot be empty", "");
+        exit();
+    }
+    if (!is_array($postData->components) || count($postData->components) === 0) {
+        http_response_code(400);
+        echo createResponse(400, "Create Record Error", "There must be atleast 1 component in the Class Record", "There must be atleast 1 component", "");
+        exit();
+    }
+    foreach ($postData->components as $component) {
+        if ($component->order === "") {
+            http_response_code(400);
+            echo createResponse(400, "Create Record Error", "Component order cannot be empty", "Component order cannot be empty", "");
+            exit();
+        }
+        if (!is_numeric($component->order)) {
+            http_response_code(400);
+            echo createResponse(400, "Create Record Error", "Component order must be a number", "Component order must be a number", "");
+            exit();
+        }
+        if ($component->order <= 0) {
+            http_response_code(400);
+            echo createResponse(400, "Create Record Error", "Component order must not be less than or equal to 0", "Component order cannot be negative", "");
+            exit();
+        }
+        if ($component->name === "") {
+            http_response_code(400);
+            echo createResponse(400, "Create Record Error", "Component name cannot be empty", "Component name cannot be empty", "");
+            exit();
+        }
+        if ($component->score === "") {
+            http_response_code(400);
+            echo createResponse(400, "Create Record Error", "Component score cannot be empty", "Component score cannot be empty", "");
+            exit();
+        }
+        if (!is_numeric($component->score)) {
+            http_response_code(400);
+            echo createResponse(400, "Create Record Error", "Component score must be a number", "Component score must be a number", "");
+            exit();
+        }
+        if ($component->score <= 0) {
+            http_response_code(400);
+            echo createResponse(400, "Create Record Error", "Component score must not be less than or equal to 0%", "Component score cannot be negative", "");
+            exit();
+        }
+    }
+
 
     $newRecordUID = "";
     $default = "Default";
@@ -286,11 +358,11 @@ if (isset($_POST['addRecord'])) {
 
             do {
                 $newComponentUID = generateUID(6) . "-" . generateUID(6);
-                $query = "SELECT * FROM " . TBL_COMPONENTS . " WHERE uid = '" . $newComponentUID . "'";
+                $query = "SELECT * FROM " . TBL_RECORDS_COMPONENTS . " WHERE uid = '" . $newComponentUID . "'";
                 $result = $connection->query($query);
             } while ($result->num_rows > 0);
 
-            $query = "INSERT INTO " . TBL_COMPONENTS . " (
+            $query = "INSERT INTO " . TBL_RECORDS_COMPONENTS . " (
                 record_id,
                 uid,
                 order_no,
@@ -323,6 +395,228 @@ if (isset($_POST['addRecord'])) {
 
 }
 
+if (isset($_POST['updateRecord'])) {
+    /*
+        Data Schema
+        {
+            "updateRecord": {
+                token: string,
+                id: string,
+                name: string,
+                section: string,
+                components: array [
+                    {
+                        order: number
+                        id: string
+                        name: string
+                        score: number
+                    }
+                ]
+            }
+        }
+    */
+
+    $postData = json_decode($_POST['updateRecord']);
+
+    if (hash("sha256", $_SESSION["uid"]) !== $postData->token) {
+        http_response_code(403);
+        echo createResponse(403, "Page Error", "Forbidden Access to Page", "Incorrect token", "");
+        session_destroy();
+        exit();
+    }
+
+    $queryRecords = "UPDATE " . TBL_RECORDS . " SET
+    name = ?,
+    section_id = ?,
+    updated_at = NOW()
+    WHERE uid = ?";
+    $stmt = $connection->prepare($queryRecords);
+    $stmt->bind_param("sss", $postData->name, $postData->section, $postData->id);
+    $stmt->execute();
+    $stmt->close();
+
+    foreach ($postData->components as $component) {
+
+        $queryComponents = "UPDATE " . TBL_RECORDS_COMPONENTS . " SET
+            order_no = ?,
+            component_name = ?,
+            score = ?,
+            updated_at = NOW()
+            WHERE (uid = ?) OR (component_name = ? AND score = ? AND record_id = ?)";
+        $stmt = $connection->prepare($queryComponents);
+        $stmt->bind_param(
+            "sssssss",
+            $component->order,
+            $component->name,
+            $component->score,
+            $component->id,
+            $component->name,
+            $component->score,
+            $postData->id
+
+        );
+        $stmt->execute();
+
+        $affectedRows = $stmt->affected_rows;
+
+        $stmt->close();
+
+        if ($affectedRows == 0) {
+            if (strpos($component->id, "element-") !== false) {
+                do {
+                    $newComponentUID = generateUID(6) . "-" . generateUID(6);
+                    $query = "SELECT * FROM " . TBL_RECORDS_COMPONENTS . " WHERE uid = '" . $newComponentUID . "'";
+                    $result = $connection->query($query);
+
+                } while ($result->num_rows > 0);
+
+                $queryNewComponent = "INSERT INTO " . TBL_RECORDS_COMPONENTS . " (
+                record_id,
+                uid,
+                order_no,
+                component_name,
+                score,
+                created_at,
+                updated_at
+            ) VALUES (?, ?, ?, ?, ?, NOW(), NOW())";
+                $stmt = $connection->prepare($queryNewComponent);
+                $stmt->bind_param(
+                    "sssss",
+                    $postData->id,
+                    $newComponentUID,
+                    $component->order,
+                    $component->name,
+                    $component->score
+
+                );
+                $stmt->execute();
+                $stmt->close();
+
+            }
+
+
+        }
+
+    }
+
+    $queryGetComponents = "SELECT component_name FROM " . TBL_RECORDS_COMPONENTS . " WHERE record_id = ?";
+    $stmt = $connection->prepare($queryGetComponents);
+    $stmt->bind_param("s", $postData->id);
+    $stmt->execute();
+
+    $result = $stmt->get_result();
+    $allComponents = [];
+
+    while ($row = $result->fetch_assoc()) {
+        array_push($allComponents, $row["component_name"]);
+    }
+
+    $stmt->close();
+
+    $postDataComponents = [];
+    foreach ($postData->components as $component) {
+        array_push($postDataComponents, $component->name);
+    }
+
+    $placeholder = array_diff($allComponents, $postDataComponents);
+
+    foreach ($placeholder as $component) {
+        $queryGetID = "SELECT uid FROM " . TBL_RECORDS_COMPONENTS . " WHERE component_name = ? AND record_id = ? LIMIT 1";
+        $stmt = $connection->prepare($queryGetID);
+        $stmt->bind_param("ss", $component, $postData->id);
+        $stmt->execute();
+        $stmt->bind_result($id);
+        $stmt->fetch();
+        $stmt->close();
+
+
+        $queryDeleteActivities = "DELETE FROM " . TBL_ACTIVITIES . " WHERE component_id = ?";
+        $stmt = $connection->prepare($queryDeleteActivities);
+        $stmt->bind_param("s", $id);
+        $stmt->execute();
+        $stmt->close();
+
+        $queryDeleteComponent = "DELETE FROM " . TBL_RECORDS_COMPONENTS . " WHERE uid = ?";
+        $stmt = $connection->prepare($queryDeleteComponent);
+        $stmt->bind_param("s", $id);
+        $stmt->execute();
+        $stmt->close();
+    }
+
+
+
+
+    http_response_code(200);
+    echo createResponse(200, "Update Successful", "", "", "");
+    exit();
+}
+
+if (isset($_POST['deleteRecord'])) {
+    /*
+        Data Schema
+        {
+            "deleteRecord": {
+                token: string,
+                id: string
+            }
+        }
+    */
+    $postData = json_decode($_POST['deleteRecord']);
+
+    if (hash("sha256", $_SESSION["uid"]) !== $postData->token) {
+        http_response_code(403);
+        echo createResponse(403, "Page Error", "Forbidden Access to Page", "Incorrect Token", "");
+        session_destroy();
+        exit();
+    }
+
+    if ($postData->id === "") {
+        http_response_code(400);
+        echo createResponse(400, "Delete Record Error", "Record ID cannot be empty", "Record ID cannot be empty", "");
+        exit();
+    }
+
+    $queryCheck = "SELECT * FROM " . TBL_RECORDS . " WHERE uid = ?";
+    $stmt = $connection->prepare($queryCheck);
+    $stmt->bind_param("s", $postData->id);
+    $stmt->execute();
+    $stmt->store_result();
+    $stmt->fetch();
+
+
+    if ($stmt->num_rows === 0) {
+        $stmt->close();
+        http_response_code(404);
+        echo createResponse(404, "Delete Class Record Error", "Record not found", "Record not found", "");
+        exit();
+    }
+
+    $queryActivities = "DELETE FROM " . TBL_ACTIVITIES . " WHERE component_id IN
+        (SELECT uid FROM " . TBL_RECORDS_COMPONENTS . " WHERE record_id = ?)";
+    $stmt = $connection->prepare($queryActivities);
+    $stmt->bind_param("s", $postData->id);
+    $stmt->execute();
+    $stmt->close();
+
+    $queryComponents = "DELETE FROM " . TBL_RECORDS_COMPONENTS . " WHERE record_id = ?";
+    $stmt = $connection->prepare($queryComponents);
+    $stmt->bind_param("s", $postData->id);
+    $stmt->execute();
+    $stmt->close();
+
+    $queryRecord = "DELETE FROM " . TBL_RECORDS . " WHERE uid = ?";
+    $stmt = $connection->prepare($queryRecord);
+    $stmt->bind_param("s", $postData->id);
+    $stmt->execute();
+    $stmt->close();
+
+    http_response_code(200);
+    echo createResponse(200, "Delete Successful", "", "", "");
+    exit();
+}
+
+
+// COMPONENTS
 if (isset($_POST['deleteComponent'])) {
 
     $postData = json_decode($_POST['deleteComponent']);
@@ -335,4 +629,11 @@ if (isset($_POST['deleteComponent'])) {
         session_destroy();
         exit();
     }
+}
+
+if (isset($_POST['logout'])) {
+    session_destroy();
+    http_response_code(200);
+    echo createResponse(200, "Logout Successful", "", "", "");
+    exit();
 }

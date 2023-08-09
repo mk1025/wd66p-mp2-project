@@ -20,6 +20,11 @@ const RecordModalAddComponentButton = document.getElementById(
   "RecordModalAddComponentButton",
 ) as HTMLButtonElement;
 
+const LogoutButton = document.getElementById(
+  "LogoutButton",
+) as HTMLButtonElement;
+
+// MODAL INITS
 const RecordModal = new Modal(document.getElementById("RecordModal"), {
   closable: false,
   onShow: () => {
@@ -61,6 +66,20 @@ const DeleteModal = new Modal(document.getElementById("DeleteModal"), {
   },
 });
 
+const ErrorModal = new Modal(document.getElementById("ErrorModal"), {
+  closable: false,
+  onShow: () => {
+    document.getElementById("ErrorModalCloseButton")!.onclick = () => {
+      ErrorModal.hide();
+    };
+    document.getElementById("ErrorModalOkayButton")!.onclick = () => {
+      ErrorModal.hide();
+    };
+  },
+});
+
+// BUTTONS
+
 AddNewRecordButton.onclick = () => {
   addRecordInit();
 };
@@ -69,10 +88,15 @@ RecordModalAddComponentButton.onclick = () => {
   addComponentInit();
 };
 
+LogoutButton.onclick = () => {
+  logout();
+};
+
 document.addEventListener("DOMContentLoaded", () => {
   populateRecords();
 });
 
+// RECORD FUNCTIONS
 function addRecordInit() {
   const RecordModalTitle = document.getElementById(
     "RecordModalTitle",
@@ -174,32 +198,249 @@ function addRecordInit() {
       });
     });
 
-    console.log({
-      name: RecordModalNameInput.value,
-      section: section,
-      components: components,
-    });
+    // console.log({
+    //   name: RecordModalNameInput.value,
+    //   section: section,
+    //   components: components,
+    // });
+    ComponentModal.hide();
+    // RecordModal.hide();
     sendDataRecord("addRecord", {
       token: sessionStorage.getItem("token"),
       name: RecordModalNameInput.value,
       section: section,
       components: components,
     });
-    ComponentModal.hide();
-    RecordModal.hide();
   };
 
   RecordModal.show();
 }
 
 function editRecordInit(record: any) {
+  sectionListDropdown(getSections());
+
   console.log("Edit Record Init: ", record);
+  /*
+    Data Schema
+    {
+
+      "id": string,
+      "record_name": string,
+      "section_id": string,
+      "section_name": string,
+      "syStart": string,
+      "syEnd": string,
+      "transmutation": {
+        "id": string,
+        "name": string,
+        "lowest": number,
+        "passing": number,
+        "highest": number
+      }
+      "color": string,
+      "components": [{
+        "id": string,
+        "component_name": string,
+        "component_score": number,
+        "activities": number,
+      }]
+
+    }
+  */
+
+  const RecordModalTitle = document.getElementById(
+    "RecordModalTitle",
+  ) as HTMLElement;
+  const RecordModalNameInput = document.getElementById(
+    "RecordModalNameInput",
+  ) as HTMLInputElement;
+
+  RecordModalTitle.innerText = "Edit Class Record: " + record.record_name;
+  RecordModalNameInput.value = record.record_name;
+
+  const SectionListRadio = document.querySelectorAll<HTMLInputElement>(
+    'input[type="radio"][name="SectionListRadio"]',
+  );
+
+  SectionListRadio.forEach((radioButton) => {
+    if (radioButton.value === record.section_id) {
+      radioButton.checked = true;
+      RecordModalSectionsButton.classList.forEach((className) => {
+        if (className.startsWith("bg-")) {
+          RecordModalSectionsButton.classList.remove(className);
+        }
+      });
+      RecordModalSectionsButton.classList.add(`bg-${record.color}-500`);
+      RecordModalSectionsButton.innerHTML = `
+            ${record.section_name}
+            <i class='fa-solid fa-caret-down ml-2'></i>
+        `;
+    }
+  });
+
+  const ComponentsTableBody = document.getElementById(
+    "ComponentsTableBody",
+  ) as HTMLTableSectionElement;
+
+  ComponentsTableBody.innerHTML = "";
+
+  let rowLength = 1;
+  for (const component of record.components) {
+    const row = document.createElement("tr");
+    row.id = component.id;
+    row.setAttribute("data-name", component.component_name);
+    row.setAttribute("data-score", component.component_score);
+
+    row.innerHTML = `<td class='p-2 font-bold text-lg text-center'>${rowLength}</td>`;
+    row.innerHTML += `<td class='p-2'>${component.component_name}</td>`;
+    row.innerHTML += `<td class='p-2 font-semibold text-right'>${component.component_score}%</td>`;
+
+    const rowActions = document.createElement("td");
+    rowActions.classList.add(
+      "p-2",
+      "flex",
+      "flex-row",
+      "gap-2",
+      "justify-end",
+      "text-white",
+    );
+
+    const settingButton = document.createElement("button");
+    settingButton.classList.add(
+      "py-2",
+      "px-3",
+      "bg-blue-400",
+      "hover:bg-blue-600",
+      "rounded",
+    );
+
+    settingButton.innerHTML = `<i class='fa-sold fas fa-cog'></i>`;
+
+    settingButton.onclick = () => {
+      editComponentInit({
+        id: row.id,
+        name: row.getAttribute("data-name"),
+        score: row.getAttribute("data-score"),
+      });
+    };
+
+    const deleteButton = document.createElement("button");
+    deleteButton.classList.add(
+      "py-2",
+      "px-3",
+      "bg-red-400",
+      "hover:bg-red-600",
+      "rounded",
+    );
+
+    deleteButton.innerHTML = `<i class='fa-solid fa-trash-can'></i>`;
+
+    deleteButton.onclick = () => {
+      deleteComponentInit({
+        id: row.id,
+        name: row.getAttribute("data-name"),
+        score: row.getAttribute("data-score"),
+      });
+    };
+
+    rowActions.appendChild(settingButton);
+    rowActions.appendChild(deleteButton);
+    row.appendChild(rowActions);
+
+    ComponentsTableBody.appendChild(row);
+    rowLength++;
+  }
+
+  computeTotalScore();
+
+  const RecordModalButton = document.getElementById(
+    "RecordModalButton",
+  ) as HTMLButtonElement;
+
+  RecordModalButton.onclick = () => {
+    const Alert = document.getElementById("RecordModalAlert") as HTMLDivElement;
+    const AlertText = document.getElementById(
+      "RecordModalAlertText",
+    ) as HTMLDivElement;
+    const ComponentsTableBody = document.getElementById(
+      "ComponentsTableBody",
+    ) as HTMLTableSectionElement;
+    if (SectionListRadio.length === 0) {
+      RecordModal.show();
+      Alert.classList.remove("hidden");
+      AlertText.innerText = "You must create a section first.";
+      return;
+    }
+
+    if (ComponentsTableBody.querySelectorAll("tr").length === 0) {
+      RecordModal.show();
+      Alert.classList.remove("hidden");
+      AlertText.innerText = "You must create a component first.";
+      return;
+    }
+
+    let section;
+
+    SectionListRadio.forEach((radioButton) => {
+      if (radioButton.checked) {
+        section = radioButton.value;
+      }
+    });
+
+    let components: any = [];
+
+    ComponentsTableBody.querySelectorAll("tr").forEach((row, index) => {
+      components.push({
+        order: index + 1,
+        id: row.id,
+        name: row.getAttribute("data-name"),
+        score: row.getAttribute("data-score"),
+      });
+    });
+
+    // console.log({
+    //   id: record.id,
+    //   name: RecordModalNameInput.value,
+    //   section: section,
+    //   components: components,
+    // });
+    ComponentModal.hide();
+    // RecordModal.hide();
+    sendDataRecord("updateRecord", {
+      token: sessionStorage.getItem("token"),
+      id: record.id,
+      name: RecordModalNameInput.value,
+      section: section,
+      components: components,
+    });
+  };
 }
 
 function deleteRecordInit(record: any) {
   console.log("Delete Record Init: ", record);
+
+  const DeleteModalText = document.getElementById(
+    "DeleteModalText",
+  ) as HTMLDivElement;
+
+  DeleteModalText.innerText = `Are you sure you want to delete '${record.record_name}' record? All of its components and associated activities will also be deleted.`;
+
+  const DeleteModalButton = document.getElementById(
+    "DeleteModalButton",
+  ) as HTMLButtonElement;
+
+  DeleteModalButton.onclick = () => {
+    sendDataRecord("deleteRecord", {
+      token: sessionStorage.getItem("token"),
+      id: record.id,
+    });
+    DeleteModal.hide();
+  };
+
+  DeleteModal.show();
 }
 
+// COMPONENT FUNCTIONS
 function addComponentInit() {
   const ComponentModalTitle = document.getElementById(
     "ComponentModalTitle",
@@ -315,7 +556,7 @@ function editComponentToTable(component: any) {
     "ComponentsTableBody",
   ) as HTMLTableSectionElement;
 
-  const row = ComponentTableBody.querySelector(`#${component.id}`);
+  const row = ComponentTableBody.querySelector(`tr[id="${component.id}"]`);
 
   row?.setAttribute("data-name", component.name);
   row?.setAttribute("data-score", component.score);
@@ -374,21 +615,18 @@ function deleteComponentInit(component: any) {
   All activities and students that have them will be deleted also...`;
 
   DeleteModalButton.onclick = () => {
-    if (component.id.includes("element")) {
-      document.getElementById(component.id)!.remove();
-      return;
-    }
-
-    sendDataRecord("deleteComponent", {
-      record: null,
-      id: component.id,
-      name: component.name,
-      score: component.score,
-    });
+    document.getElementById(component.id)!.remove();
+    DeleteModal.hide();
   };
+
+  DeleteModal.show();
 }
 
+// AJAX
 function sendDataRecord(title: string, data: any) {
+  const ErrorModalText = document.getElementById(
+    "ErrorModalText",
+  ) as HTMLHeadingElement;
   ActionSpinner.classList.remove("hidden");
 
   $.ajax({
@@ -402,6 +640,9 @@ function sendDataRecord(title: string, data: any) {
         `Successful '${title}' response: `,
         JSON.parse(response) || response,
       );
+      DeleteModal.hide();
+      ComponentModal.hide();
+      RecordModal.hide();
       populateRecords();
     },
     error: function (xhr, status, error) {
@@ -412,6 +653,29 @@ function sendDataRecord(title: string, data: any) {
       console.error("(Error) Status: ", status);
       console.error("Error: ", error);
       console.groupEnd();
+      if (xhr.status === 403) window.location.href = Routes.LOGIN_PAGE;
+
+      let data = JSON.parse(xhr.responseText);
+      ErrorModalText.innerHTML = `
+        <b>Error:</b> <br>${data.title || "Internal Server Error"}
+        <br><br>
+        ${data.message || "Internal Server Error"}
+        `;
+
+      ErrorModal.show();
+
+      DeleteModal.hide();
+      if (RecordModal.isVisible()) {
+        ComponentModal.hide();
+        return;
+      }
+      RecordModal.hide();
+
+      // if (document.querySelectorAll("div[modal-backdrop]").length > 0) {
+      //   document.querySelectorAll("div[modal-backdrop]").forEach((element) => {
+      //     element.remove();
+      //   });
+      // }
     },
   });
 }
@@ -658,6 +922,10 @@ function createRecord(record: any) {
     "hover:bg-amber-600",
   );
   ViewButton.innerHTML = `<i class="fa-solid fas fa-folder-open"></i>`;
+  ViewButton.onclick = () => {
+    const recordId = record.id.toString().toLowerCase().replace(/-/g, "_");
+    window.location.href = Routes.VIEWRECORD_PAGE + "/?v=" + recordId;
+  };
 
   const SettingsButton = document.createElement("button");
   SettingsButton.classList.add(
@@ -764,6 +1032,9 @@ function populateRecords() {
       console.error("(Error) Status: ", status);
       console.error("Error: ", error);
       console.groupEnd();
+      if (xhr.status === 401 || xhr.status === 403) {
+        logout();
+      }
     },
   });
 }
@@ -787,6 +1058,35 @@ function computeTotalScore() {
   ComponentsTotalScore.innerText = `${totalScore}%`;
 }
 
+function logout() {
+  ActionSpinner.classList.remove("hidden");
+  $.ajax({
+    type: "POST",
+    data:
+      "logout=" + JSON.stringify({ token: sessionStorage.getItem("token") }),
+    url: Routes.CLASSRECORDS_API,
+    success: function (response) {
+      ActionSpinner.classList.add("hidden");
+      console.log(
+        "Successful logout response: ",
+        JSON.parse(response) || response,
+      );
+      sessionStorage.removeItem("token");
+      window.location.href = Routes.LOGIN_PAGE;
+    },
+    error: function (xhr, status, error) {
+      ActionSpinner.classList.add("hidden");
+      console.group(`Logout - Errors:`);
+      console.error("(Error) XHR Status: ", xhr.status);
+      console.error("(Error) XHR Text: ", xhr.responseText);
+      console.error("(Error) Status: ", status);
+      console.error("Error: ", error);
+      console.groupEnd();
+    },
+  });
+}
+
+// OTHER FUNCTIONS
 function generateElementRandomId() {
   const prefix = "element";
   const randomString = Math.random().toString(36).substring(2, 8);

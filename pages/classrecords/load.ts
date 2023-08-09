@@ -10,11 +10,20 @@ document.addEventListener("DOMContentLoaded", function () {
 
   $.ajax({
     type: "POST",
-    url: Routes.LOGIN_API,
+    url: Routes.CLASSRECORDS_API,
     data: "session=" + JSON.stringify(data),
     success: function (response) {
       console.log("Successful Response: ", JSON.parse(response) || response);
       document.getElementById("Site-Spinner")?.classList.add("hidden");
+
+      let data = JSON.parse(response);
+      document.getElementById("Profile_FirstName")!.innerText =
+        data.data.user.firstName || "???";
+      document.getElementById("Profile_LastName")!.innerText =
+        data.data.user.lastName || "???";
+      document
+        .getElementById("Profile_Photo")
+        ?.setAttribute("src", "../../api/" + data.data.user.imagePath);
     },
     error: function (xhr, status, error) {
       document.getElementById("Site-Spinner")?.classList.remove("hidden");

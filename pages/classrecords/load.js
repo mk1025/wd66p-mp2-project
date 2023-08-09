@@ -8,12 +8,19 @@ document.addEventListener("DOMContentLoaded", function () {
     };
     $.ajax({
         type: "POST",
-        url: Routes.LOGIN_API,
+        url: Routes.CLASSRECORDS_API,
         data: "session=" + JSON.stringify(data),
         success: function (response) {
-            var _a;
+            var _a, _b;
             console.log("Successful Response: ", JSON.parse(response) || response);
             (_a = document.getElementById("Site-Spinner")) === null || _a === void 0 ? void 0 : _a.classList.add("hidden");
+            let data = JSON.parse(response);
+            document.getElementById("Profile_FirstName").innerText =
+                data.data.user.firstName || "???";
+            document.getElementById("Profile_LastName").innerText =
+                data.data.user.lastName || "???";
+            (_b = document
+                .getElementById("Profile_Photo")) === null || _b === void 0 ? void 0 : _b.setAttribute("src", "../../api/" + data.data.user.imagePath);
         },
         error: function (xhr, status, error) {
             var _a;
