@@ -1,9 +1,22 @@
 import * as Routes from "../../scripts/routes.js";
+import * as dts from "./script.d";
+
 // @ts-ignore
 import { Modal } from "flowbite";
 
 // CONSOLE LOG OPTION
 const ENABLE_CONSOLELOG = true;
+
+// ELEMENTS
+const ClassRecord_Title = document.getElementById(
+  "ClassRecordTitle",
+) as HTMLHeadingElement;
+const ClassRecord_Section = document.getElementById(
+  "ClassRecordSection",
+) as HTMLHeadingElement;
+const ClassRecord_SY = document.getElementById(
+  "ClassRecordSY",
+) as HTMLHeadingElement;
 
 // SPINNERS
 const SiteSpinner = document.getElementById("Site-Spinner") as HTMLDivElement;
@@ -14,6 +27,28 @@ const ActionSpinner = document.getElementById(
 // BUTTONS
 const ExitButton = document.getElementById("ExitButton") as HTMLButtonElement;
 ExitButton.onclick = () => (window.location.href = Routes.CLASSRECORDS_PAGE);
+
+const ActivityThemeButton = document.getElementById(
+  "ActivityModalThemeButton",
+) as HTMLButtonElement;
+
+// INPUT ELEMENTS
+const ActivityColorRadio = document.querySelectorAll<HTMLInputElement>(
+  'input[type="radio"][name="ActivityColorRadio"]',
+);
+
+ActivityColorRadio.forEach((radioButton) => {
+  radioButton.addEventListener("change", (event) => {
+    const color = (event.target as HTMLInputElement).value;
+    ActivityThemeButton.classList.forEach((className) => {
+      if (className.startsWith("bg-")) {
+        ActivityThemeButton.classList.remove(className);
+      }
+    });
+
+    ActivityThemeButton.classList.add(`bg-${color}-500`);
+  });
+});
 
 // MODAL INITS
 const ActivityModal = new Modal(document.getElementById("ActivityModal"), {
@@ -27,17 +62,79 @@ const ActivityModal = new Modal(document.getElementById("ActivityModal"), {
     };
   },
 });
+const ActivityModalTitle = document.getElementById(
+  "ActivityModalTitle",
+) as HTMLHeadingElement;
+const ActivityModal_NameInput = document.getElementById(
+  "ActivityModalNameInput",
+) as HTMLInputElement;
+const ActivityModal_TypeInput = document.getElementById(
+  "ActivityModalTypeInput",
+) as HTMLInputElement;
+const ActivityModalButton = document.getElementById(
+  "ActivityModalButton",
+) as HTMLButtonElement;
+const ActivityModalDeleteButton = document.getElementById(
+  "ActivityModalDeleteButton",
+) as HTMLButtonElement;
+const ActivityModalAddComponentButton = document.getElementById(
+  "ActivityModalAddComponentButton",
+) as HTMLButtonElement;
+
+const ActivityComponentModal = new Modal(
+  document.getElementById("ActivityComponentModal"),
+  {
+    closable: false,
+    onShow: () => {
+      document.getElementById("ActivityComponentModalCloseButton")!.onclick =
+        () => {
+          ActivityComponentModal.hide();
+          ActivityModal.show();
+        };
+      document.getElementById("ActivityComponentModalCancelButton")!.onclick =
+        () => {
+          ActivityComponentModal.hide();
+          ActivityModal.show();
+        };
+    },
+  },
+);
+const ActivityComponentModalButton = document.getElementById(
+  "ActivityComponentModalButton",
+) as HTMLButtonElement;
+
+const DeleteModal = new Modal(document.getElementById("DeleteModal"), {
+  closable: false,
+  onShow: () => {
+    document.getElementById("DeleteModalCloseButton")!.onclick = () => {
+      DeleteModal.hide();
+    };
+    document.getElementById("DeleteModalCancelButton")!.onclick = () => {
+      DeleteModal.hide();
+    };
+  },
+});
+const DeleteModalText = document.getElementById(
+  "DeleteModalText",
+) as HTMLHeadingElement;
+const DeleteModalButton = document.getElementById(
+  "DeleteModalButton",
+) as HTMLButtonElement;
+
 const ErrorModal = new Modal(document.getElementById("ErrorModal"), {
   closable: false,
   onShow: () => {
     document.getElementById("ErrorModalCloseButton")!.onclick = () => {
       ErrorModal.hide();
     };
-    document.getElementById("ErrorModalCancelButton")!.onclick = () => {
+    document.getElementById("ErrorModalOkayButton")!.onclick = () => {
       ErrorModal.hide();
     };
   },
 });
+const ErrorModalText = document.getElementById(
+  "ErrorModalText",
+) as HTMLHeadingElement;
 
 // DOM INIT
 document.addEventListener("DOMContentLoaded", () => {
@@ -76,52 +173,256 @@ document.addEventListener("DOMContentLoaded", () => {
 // INITS
 function newActivityInit(record_id: string, component_id: string) {
   ENABLE_CONSOLELOG &&
-    console.log("New Activity Init: ", record_id, component_id);
+    console.log("New Activity Init: ", { record_id, component_id });
+
+  ActivityModalDeleteButton.classList.add("hidden");
+
+  ActivityModalTitle.innerText = "Add a New Activity";
+  ActivityModal_NameInput.value = "";
+  ActivityModal_TypeInput.value = "";
+  setActivityColor("amber");
+
+  const ComponentList = document.getElementById(
+    "ActivityComponentsTableBody",
+  ) as HTMLTableSectionElement;
+
+  ComponentList.innerHTML = "";
+
+  ActivityModalAddComponentButton.onclick = () => {
+    newActivityComponentInit();
+  };
+
+  ActivityModalButton.onclick = () => {
+    ActivityModal.show();
+    sendData("addActivity", {
+      name: ActivityModal_NameInput.value,
+      type: ActivityModal_TypeInput.value,
+      record_id: record_id,
+      component_id: component_id,
+      color: getActivityColor(),
+      components: getActivityComponents(),
+    });
+  };
+
+  computeActivityComponents();
 
   ActivityModal.show();
 }
 
-interface InterfaceActivity {
-  id: string;
-  name: string;
-  type: string;
-  color: string;
-  components: [
-    {
-      id: string;
-      name: string;
-      type: string;
-      score: number;
-      bonus: boolean;
-    },
-  ];
-}
 function editActivityInit(
   record_id: string,
   component_id: string,
-  activity: InterfaceActivity,
+  activity: dts.InterfaceActivity,
+  activity_id: string,
 ) {
   ENABLE_CONSOLELOG &&
-    console.log("Edit Activity Init: ", { record_id, component_id, activity });
+    console.log("Edit Activity Init: ", {
+      record_id,
+      component_id,
+      activity,
+      activity_id,
+    });
+
+  ActivityModalDeleteButton.classList.add("hidden");
+
+  ActivityModalTitle.innerText = `Edit Activity: ${activity.name}`;
+  ActivityModal_NameInput.value = activity.name;
+  ActivityModal_TypeInput.value = activity.type;
+  setActivityColor(activity.color);
+
+  const ComponentList = document.getElementById(
+    "ActivityComponentsTableBody",
+  ) as HTMLTableSectionElement;
+
+  ComponentList.innerHTML = "";
+
+  for (let component of activity.components) {
+    insertNewActivityComponent(
+      component.id,
+      component.name,
+      component.type,
+      component.score,
+      component.bonus,
+    );
+  }
+
+  ActivityModalAddComponentButton.onclick = () => {
+    newActivityComponentInit();
+  };
+
+  ActivityModalButton.onclick = () => {
+    ActivityModal.show();
+    sendData("updateActivity", {
+      name: ActivityModal_NameInput.value,
+      type: ActivityModal_TypeInput.value,
+      record_id: record_id,
+      component_id: component_id,
+      activity_id: activity_id,
+      color: getActivityColor(),
+      components: getActivityComponents(),
+    });
+  };
+
+  ActivityModalDeleteButton.onclick = () => {
+    deleteActivityInit(component_id, activity_id, activity.name);
+  };
+
+  computeActivityComponents();
+
+  ActivityModalDeleteButton.classList.remove("hidden");
+  ActivityModal.show();
 }
 
-interface InterfaceStudent {
-  id: string;
-  gender: string;
-  last_name: string;
-  first_name: string;
-  activities: [
-    {
-      id: string;
-      component_id: string;
-      score: number;
-    },
-  ];
+function deleteActivityInit(
+  component_id: string,
+  activity_id: string,
+  activity_name: string,
+) {
+  ENABLE_CONSOLELOG &&
+    console.log("Delete Activity Init: ", {
+      component_id,
+      activity_id,
+      activity_name,
+    });
+
+  DeleteModalText.innerHTML = `
+    Are you sure you want to delete '${activity_name}' activity from this component?<br>
+
+    All scores of the students that have this activity will be deleted...
+    
+  `;
+
+  DeleteModalButton.onclick = () => {
+    DeleteModal.hide();
+    ActivityModal.hide();
+    sendData("deleteActivity", {
+      component_id: component_id,
+      activity_id: activity_id,
+    });
+  };
+
+  DeleteModal.show();
 }
+
+// Activity Component
+function newActivityComponentInit() {
+  ActivityModal.hide();
+
+  const Title = document.getElementById(
+    "ActivityComponentModalTitle",
+  ) as HTMLHeadingElement;
+  const NameInput = document.getElementById(
+    "ACModalNameInput",
+  ) as HTMLInputElement;
+  const TypeInput = document.getElementById(
+    "ACModalTypeInput",
+  ) as HTMLInputElement;
+  const ScoreInput = document.getElementById(
+    "ACModalScoreInput",
+  ) as HTMLInputElement;
+  const Checkbox = document.getElementById(
+    "ACModalBonusCheckbox",
+  ) as HTMLInputElement;
+  Title.innerText = "Add a New Activity Component";
+  NameInput.value = "";
+  TypeInput.value = "";
+  ScoreInput.value = "0";
+  Checkbox.checked = false;
+
+  ActivityComponentModalButton.onclick = () => {
+    insertNewActivityComponent(
+      null,
+      NameInput.value,
+      TypeInput.value,
+      parseInt(ScoreInput.value),
+      Checkbox.checked,
+    );
+  };
+}
+
+function editActivityComponentInit(id: string) {
+  ENABLE_CONSOLELOG &&
+    console.log("Edit Activity Component Init: ", {
+      id,
+    });
+
+  ActivityModal.hide();
+
+  const Title = document.getElementById(
+    "ActivityComponentModalTitle",
+  ) as HTMLHeadingElement;
+  const NameInput = document.getElementById(
+    "ACModalNameInput",
+  ) as HTMLInputElement;
+  const TypeInput = document.getElementById(
+    "ACModalTypeInput",
+  ) as HTMLInputElement;
+  const ScoreInput = document.getElementById(
+    "ACModalScoreInput",
+  ) as HTMLInputElement;
+  const Checkbox = document.getElementById(
+    "ACModalBonusCheckbox",
+  ) as HTMLInputElement;
+
+  const RowData = document.querySelector(`tr[id="${id}"]`);
+
+  Title.innerText = `Edit Activity Component: ${name}`;
+  NameInput.value = RowData?.getAttribute("data-name") ?? "";
+  TypeInput.value = RowData?.getAttribute("data-type") ?? "";
+  ScoreInput.value = RowData?.getAttribute("data-score") ?? "0";
+  Checkbox.checked = parseBool(RowData?.getAttribute("data-bonus")!);
+
+  ActivityComponentModalButton.onclick = () => {
+    editActivityComponentToTable(id);
+  };
+
+  ActivityComponentModal.show();
+}
+
+function editActivityComponentToTable(id: string) {
+  const ComponentList = document.getElementById(
+    "ActivityComponentsTableBody",
+  ) as HTMLTableSectionElement;
+
+  const Title = document.getElementById(
+    "ActivityComponentModalTitle",
+  ) as HTMLHeadingElement;
+  const NameInput = document.getElementById(
+    "ACModalNameInput",
+  ) as HTMLInputElement;
+  const TypeInput = document.getElementById(
+    "ACModalTypeInput",
+  ) as HTMLInputElement;
+  const ScoreInput = document.getElementById(
+    "ACModalScoreInput",
+  ) as HTMLInputElement;
+  const Checkbox = document.getElementById(
+    "ACModalBonusCheckbox",
+  ) as HTMLInputElement;
+
+  const RowData = ComponentList.querySelector(`tr[id="${id}"]`);
+
+  RowData?.setAttribute("data-id", id);
+  RowData?.setAttribute("data-name", NameInput.value);
+  RowData?.setAttribute("data-type", TypeInput.value);
+  RowData?.setAttribute("data-score", ScoreInput.value);
+  RowData?.setAttribute("data-bonus", Checkbox.checked ? "true" : "false");
+
+  RowData!.querySelectorAll("td")[0].innerText = NameInput.value;
+  RowData!.querySelectorAll("td")[1].innerText = TypeInput.value;
+  RowData!.querySelectorAll("td")[2].innerText = ScoreInput.value;
+  RowData!.querySelectorAll("td")[3].innerText = Checkbox.checked
+    ? "Yes"
+    : "No";
+
+  computeActivityComponents();
+  ActivityComponentModal.hide();
+}
+
 function editStudentActivity(
   record_id: string,
-  activity: InterfaceActivity,
-  student: InterfaceStudent,
+  activity: dts.InterfaceActivity,
+  student: dts.InterfaceStudent,
   component_id: string,
 ) {
   ENABLE_CONSOLELOG &&
@@ -131,9 +432,57 @@ function editStudentActivity(
       student,
       component_id,
     });
+
+  ActivityModal.show();
 }
 
 // AJAX
+function sendData(title: string, data: any) {
+  ActionSpinner.classList.remove("hidden");
+
+  let sendData = {
+    token: sessionStorage.getItem("token"),
+    data: data,
+  };
+
+  ENABLE_CONSOLELOG && console.log(`Send Data (${title}): `, sendData);
+
+  $.ajax({
+    type: "POST",
+    url: Routes.VIEWRECORD_API,
+    data: `${title}=` + JSON.stringify(sendData),
+    success: function (response) {
+      ActionSpinner.classList.add("hidden");
+      ENABLE_CONSOLELOG &&
+        console.log(
+          `Successful '${title}' response: `,
+          JSON.parse(response) || response,
+        );
+      ActivityComponentModal.hide();
+      ActivityModal.hide();
+      getData();
+    },
+    error: function (xhr, status, error) {
+      ActionSpinner.classList.add("hidden");
+      if (ENABLE_CONSOLELOG) {
+        console.group("Send Data Error:");
+        console.error("(Error) XHR Status: ", xhr.status);
+        console.error("(Error) XHR Text: ", xhr.responseText);
+        console.error("(Error) Status: ", status);
+        console.error("Error: ", error);
+        console.groupEnd();
+      }
+      if (xhr.status === 403) window.location.href = Routes.LOGIN_PAGE;
+
+      let data = JSON.parse(xhr.responseText);
+      ErrorModalText.innerHTML = `Error:<br> ${data.title}<br><br> ${
+        data.message || "Internal Server Error"
+      }`;
+      ErrorModal.show();
+    },
+  });
+}
+
 function getData() {
   ActionSpinner.classList.remove("hidden");
 
@@ -156,8 +505,22 @@ function getData() {
     data: "getData=" + JSON.stringify(data),
     success: function (response) {
       ENABLE_CONSOLELOG &&
-        console.log("Successful Response: ", JSON.parse(response) || response);
+        console.log(
+          "Successful GET DATA Response: ",
+          JSON.parse(response) || response,
+        );
+      ClassRecord_Title.innerText = JSON.parse(response).data.name;
+      ClassRecord_Title.classList.add(
+        `text-${JSON.parse(response).data.color}-500`,
+      );
+      ClassRecord_Section.innerText = JSON.parse(response).data.section_name;
+      ClassRecord_Section.classList.add(
+        `text-${JSON.parse(response).data.color}-400`,
+      );
 
+      ClassRecord_SY.innerText = `S.Y. ${dateFormatter(
+        JSON.parse(response).data.syStart,
+      )} - ${dateFormatter(JSON.parse(response).data.syEnd)}`;
       populateComponentList(JSON.parse(response).data);
     },
     error: function (xhr, status, error) {
@@ -180,69 +543,116 @@ function getData() {
 }
 
 // DOM CREATION
-interface InterfaceRecord {
-  id: string;
-  name: string;
-  section_id: string;
-  section_name: string;
-  syStart: string;
-  syEnd: string;
-  color: string;
-  transmutation: {
-    id: string;
-    name: string;
-    lowest: number;
-    passing: number;
-    highest: number;
+function insertNewActivityComponent(
+  id: string | null,
+  name: string,
+  type: string,
+  score: number | string,
+  bonus: boolean,
+) {
+  if (!ActivityModal.isVisible()) ActivityModal.show();
+
+  ENABLE_CONSOLELOG &&
+    console.log("Insert New Activity Component: ", {
+      id,
+      name,
+      type,
+      score,
+      bonus,
+    });
+
+  const TableBody = document.getElementById(
+    "ActivityComponentsTableBody",
+  ) as HTMLTableSectionElement;
+
+  const Row = document.createElement("tr");
+
+  Row.id = id || generateElementRandomId();
+  Row.setAttribute("data-id", Row.id);
+  Row.setAttribute("data-name", name);
+  Row.setAttribute("data-type", type);
+  Row.setAttribute("data-score", score.toString());
+  Row.setAttribute("data-bonus", parseBool(bonus.toString()).toString());
+
+  Row.innerHTML = `
+    <td class='p-2'>${name}</td>
+    <td class='p-2'>${type}</td>
+    <td class='p-2 text-center'>${score}</td>
+    <td class='p-2 text-center'>${
+      parseBool(bonus.toString()) ? "Yes" : "No"
+    }</td>
+  `;
+
+  const RowButtons = document.createElement("td");
+  RowButtons.classList.add("p-2", "flex", "flex-row", "gap-2", "justify-end");
+
+  const EditButton = document.createElement("button");
+  EditButton.classList.add(
+    "px-3",
+    "py-2",
+    "text-white",
+    "bg-blue-400",
+    "hover:bg-blue-600",
+    "rounded",
+  );
+  EditButton.innerHTML = "<i class='fa-solid fas fa-cog'></i>";
+
+  EditButton.onclick = () => {
+    editActivityComponentInit(Row.id);
   };
-  components: [
-    {
-      id: string;
-      name: string;
-      order_no: number;
-      score: number;
-      activities: [
-        {
-          id: string;
-          name: string;
-          type: string;
-          color: string;
-          components: [
-            {
-              id: string;
-              name: string;
-              type: string;
-              score: number;
-              bonus: boolean;
-            },
-          ];
-        },
-      ];
-    },
-  ];
-  students: [
-    {
-      id: string;
-      gender: string;
-      last_name: string;
-      first_name: string;
-      activities: [
-        {
-          id: string;
-          component_id: string;
-          score: number;
-        },
-      ];
-    },
-  ];
+
+  const DeleteButton = document.createElement("button");
+  DeleteButton.classList.add(
+    "px-3",
+    "py-2",
+    "text-white",
+    "bg-red-400",
+    "hover:bg-red-600",
+    "rounded",
+  );
+  DeleteButton.innerHTML = "<i class='fa-solid fas fa-trash'></i>";
+
+  DeleteButton.onclick = () => {
+    deleteActivityComponent(Row.id, name);
+  };
+
+  RowButtons.appendChild(EditButton);
+  RowButtons.appendChild(DeleteButton);
+
+  Row.appendChild(RowButtons);
+  TableBody.appendChild(Row);
+
+  computeActivityComponents();
 }
-function populateComponentList(record: InterfaceRecord) {
+
+function deleteActivityComponent(id: string, name: string) {
+  const TableBody = document.getElementById(
+    "ActivityComponentsTableBody",
+  ) as HTMLTableSectionElement;
+
+  DeleteModalText.innerText = `Are you sure you want to delete '${name}' component?`;
+
+  DeleteModalButton.onclick = () => {
+    TableBody.querySelectorAll("tr").forEach((row) => {
+      if (row.getAttribute("data-id") === id) {
+        row.remove();
+      }
+    });
+    DeleteModal.hide();
+    computeActivityComponents();
+  };
+
+  DeleteModal.show();
+}
+
+function populateComponentList(record: dts.InterfaceRecord) {
   const ComponentsList = document.getElementById(
     "ComponentsList",
   ) as HTMLElement;
 
   ComponentsList.innerHTML = "";
 
+  // Components
   for (let component of record.components) {
     const NewComponent = document.createElement("div");
     NewComponent.classList.add("w-max");
@@ -285,7 +695,7 @@ function populateComponentList(record: InterfaceRecord) {
     const Table = document.createElement("table");
     Table.classList.add(
       "w-full",
-      "border",
+      "border-2",
       `border-${record.color}-500`,
       "rounded-b",
       "bg-white",
@@ -336,14 +746,20 @@ function populateComponentList(record: InterfaceRecord) {
       );
       Button.innerHTML = `
         <span class='group-hover:hidden'>
-        ${activity.components.reduce(
-          (sum, component) => sum + component.score,
-          0,
-        )}</span>
+        ${activity.components.reduce((sum, component) => {
+          if (parseBool(component.bonus.toString())) {
+            return sum + 0;
+          }
+          return sum + parseInt(component.score as string) || 0;
+        }, 0)}</span>
         <span class='hidden group-hover:inline'>
           <i class='fa-solid fa-pen'></i>
         </span>
       `;
+
+      Button.onclick = () => {
+        editActivityInit(record.id, component.id, activity, activity.id);
+      };
 
       TableHead.appendChild(Button);
       TableHeaderRow.appendChild(TableHead);
@@ -362,9 +778,10 @@ function populateComponentList(record: InterfaceRecord) {
     NewActivityButton.classList.add(
       "border-2",
       "border-green-400",
-      "text-green-400",
-      "hover:text-white",
-      "hover:bg-green-400",
+      "text-white",
+      "bg-green-400",
+      "hover:bg-green-600",
+      "hover:border-green-600",
       "rounded",
       "py-2",
       "px-3",
@@ -381,10 +798,12 @@ function populateComponentList(record: InterfaceRecord) {
 
     let totalScore = 0;
     for (let activity of component.activities) {
-      totalScore += activity.components.reduce(
-        (sum, component) => sum + component.score,
-        0,
-      );
+      totalScore += activity.components.reduce((sum, component) => {
+        if (parseBool(component.bonus.toString())) {
+          return sum + 0;
+        }
+        return sum + parseInt(component.score as string) || 0;
+      }, 0);
     }
 
     TableHeaderRow.insertAdjacentHTML(
@@ -455,7 +874,7 @@ function populateComponentList(record: InterfaceRecord) {
         let studentScore = 0;
         for (let studentActivity of student.activities) {
           if (studentActivity.id === activity.id) {
-            studentScore += studentActivity.score;
+            studentScore += parseInt(studentActivity.score as string) || 0;
           }
         }
 
@@ -478,10 +897,12 @@ function populateComponentList(record: InterfaceRecord) {
       let getActivityTotalScore = component.activities.reduce(
         (sum, activity) =>
           sum +
-          activity.components.reduce(
-            (sum, component) => sum + component.score,
-            0,
-          ),
+          activity.components.reduce((sum, component) => {
+            if (parseBool(component.bonus.toString())) {
+              return sum + 0;
+            }
+            return sum + parseInt(component.score as string) || 0;
+          }, 0),
         0,
       );
 
@@ -501,7 +922,7 @@ function populateComponentList(record: InterfaceRecord) {
             0,
             100,
             0,
-            component.score,
+            parseInt(component.score as string) || 0,
             (studentTotalScore / getActivityTotalScore) * 100 || 0,
           ) || 0
         } %
@@ -537,9 +958,294 @@ function populateComponentList(record: InterfaceRecord) {
   }
 
   // Create Final Grade Component
+
+  let FinalGradeTotal = 0;
+
+  for (let component of record.components) {
+    FinalGradeTotal += parseInt(component.score as string) || 0;
+  }
+
+  const FG_Component = document.createElement("div");
+  FG_Component.classList.add("w-max");
+
+  const FG_Header = document.createElement("header");
+  FG_Header.classList.add(
+    "w-full",
+    "bg-gray-500",
+    "text-white",
+    "p-5",
+    "flex",
+    "flex-row",
+    "gap-2",
+    "items-center",
+    "rounded-t",
+  );
+
+  FG_Header.innerHTML = `
+    <div class='w-max px-2 text-md text-gray-500 text-center bg-white rounded-full font-medium'>
+      ${FinalGradeTotal} %
+    </div>
+    <h1 class='font-bold flex-grow'>Final Grade</h1>
+  `;
+
+  const FG_HeaderButton = document.createElement("button");
+  FG_HeaderButton.classList.add(
+    "px-3",
+    "py-1",
+    "font-medium",
+    "text-sm",
+    "bg-inherit",
+    "hover:bg-white",
+    "hover:text-gray-500",
+    "rounded",
+    "whitespace-nowrap",
+  );
+  FG_HeaderButton.innerHTML = `
+    Hide Table <i class='fa-solid fa-table-columns ml-2'></li>
+  `;
+
+  const FG_Table = document.createElement("table");
+  FG_Table.classList.add(
+    "w-full",
+    "table-auto",
+    "border-2",
+    "border-gray-500",
+    "rounded",
+    "bg-white",
+    "whitespace-nowrap",
+  );
+
+  const FG_TableHeader = document.createElement("thead");
+  FG_TableHeader.innerHTML = `
+    <tr class='bg-gray-500 text-white uppercase'>
+      <th rowspan='3' scope='col' class='px-6 py-3 align-bottom text-center'>ID</th>
+      <th rowspan='3' scope='col' class='px-6 py-3 align-bottom'>Gender</th>
+      <th rowspan='3' scope='col' class='px-6 py-3 align-bottom'>Last Name</th>
+      <th rowspan='3' scope='col' class='px-6 py-3 align-bottom'>First Name</th>
+      <th colspan='${record.components.length}' scope='col' class='px-6 py-3 align-bottom'>Components</th>
+      <th colspan='3' scope='col' class='px-6 py-3 align-bottom'></th>
+    </tr>
+    
+  `;
+  let FG_TableHeaderRow = document.createElement("tr");
+  FG_TableHeaderRow.classList.add(
+    "bg-gray-100",
+    "text-gray-500",
+    "text-center",
+  );
+
+  for (let component of record.components) {
+    FG_TableHeaderRow.innerHTML += `
+      <th scope='col' class='px-6 py-2 border-x border-x-neutral-400'>${component.name}</th>
+    `;
+  }
+
+  FG_TableHeaderRow.innerHTML += `
+      <th scope='col' class='px-6 py-2 bg-gray-500 text-white uppercase'>Total Percentage</th>
+      <th scope='col' class='px-6 py-2 bg-gray-500 text-white uppercase'>Transmutated</th>
+      <th scope='col' class='px-6 py-2 bg-gray-500 text-white uppercase'></th>
+  `;
+
+  FG_TableHeader.appendChild(FG_TableHeaderRow);
+
+  FG_TableHeaderRow = document.createElement("tr");
+
+  for (let component of record.components) {
+    FG_TableHeaderRow.innerHTML += `
+      <th scope='col' class='px-6 py-2 border-x border-x-neutral-400'>${component.score} %</th>
+    `;
+  }
+
+  FG_TableHeaderRow.innerHTML += `
+      <th scope='col' class='px-6 py-2 border-x border-x-neutral-400 text-black text-xl'>
+      ${FinalGradeTotal} %
+      </th>
+      <th scope='col' class='px-6 py-2 border-x border-x-neutral-400 text-black text-2xl'>
+        <span class='text-red-400'>${record.transmutation.lowest}% </span>
+        <i class='fa-solid fa-right-long'></i>
+        <span class='text-green-400'>${record.transmutation.passing}% </span>
+        <i class='fa-solid fa-right-long'></i>
+        <span class='text-blue-400'>${record.transmutation.highest}% </span>
+      </th>
+      <th scope='col' class='px-6 py-2 bg-gray-500 text-white uppercase'>Remarks</th>
+  `;
+
+  FG_TableHeader.appendChild(FG_TableHeaderRow);
+
+  FG_HeaderButton.onclick = () => {
+    FG_Table.classList.toggle("hidden");
+    if (FG_Table.classList.contains("hidden")) {
+      FG_HeaderButton.innerHTML = `
+         Show Table <i class='fa-solid fa-table-columns ml-2'></li>
+         `;
+    } else {
+      FG_HeaderButton.innerHTML = `
+         Hide Table <i class='fa-solid fa-table-columns ml-2'></li>
+         `;
+    }
+  };
+
+  const FG_TableBody = document.createElement("tbody");
+  FG_TableBody.classList.add("text-md", "text-neutral-500", "font-medium");
+
+  let change_bg = true;
+  for (let student of record.students) {
+    const FG_TableBodyRow = document.createElement("tr");
+    change_bg && FG_TableBodyRow.classList.add(`bg-gray-100`);
+
+    let genderDisplay =
+      "<td class='px-6 py-3 text-neutral-500'><i class='fa-solid fa-venus-mars'></i> Other </td>";
+    if (student.gender.toUpperCase() === "MALE")
+      genderDisplay =
+        "<td class='px-6 py-3 text-blue-500'><i class='fa-solid fa-mars'></i> Male </td>";
+    if (student.gender.toUpperCase() === "FEMALE")
+      genderDisplay =
+        "<td class='px-6 py-3 text-pink-500'><i class='fa-solid fa-venus'></i> Female </td>";
+
+    FG_TableBodyRow.innerHTML = `
+      <td class='px-6 py-3 font-mono text-neutral-400'>${student.id}</td>
+      ${genderDisplay}
+      <td class='px-6 py-3 uppercase font-medium text-black'>${student.last_name}</td>
+      <td class='px-6 py-3'>${student.first_name}</td>
+    `;
+
+    let componentScoreList = [];
+
+    for (let component of record.components) {
+      let componentSum = 0;
+
+      for (let activity of component.activities) {
+        for (let activityComponent of activity.components) {
+          if (!activityComponent.bonus)
+            componentSum += parseInt(activityComponent.score as string) || 0;
+        }
+      }
+
+      let studentSum = 0;
+      for (let activity of student.activities) {
+        if (activity.component_id == component.id) {
+          studentSum += parseInt(activity.score as string) || 0;
+        }
+      }
+
+      let totalWeighted =
+        LinearScale(
+          0,
+          100,
+          0,
+          parseInt(component.score as string) || 0,
+          studentSum / componentSum,
+        ) || 0;
+
+      componentScoreList.push(totalWeighted);
+    }
+
+    for (let score of componentScoreList) {
+      FG_TableBodyRow.innerHTML += `
+        <td class='px-6 py-3 border-x border-x-neutral-400 text-center text-gray-400'>${score}%</td>
+      `;
+    }
+
+    // ENABLE_CONSOLELOG && console.log(componentScoreList);
+
+    let totalStudentPercentage = componentScoreList.reduce(
+      (sum, score) => sum + score,
+      0,
+    );
+
+    let componentTotalPercentage = record.components.reduce(
+      (sum, component) => sum + parseInt(component.score as string) || 0,
+      0,
+    );
+    let percentageTransmutated =
+      LinearScale(
+        0,
+        componentTotalPercentage,
+        record.transmutation.lowest,
+        record.transmutation.highest,
+        totalStudentPercentage,
+      ) || 0;
+
+    let studentRemark = "<span class='text-red-400 uppercase'>Failed</span>";
+    if (percentageTransmutated >= record.transmutation.passing) {
+      studentRemark = "<span class='text-green-400 uppercase'>Passed</span>";
+    }
+
+    FG_TableBodyRow.innerHTML += `
+      <td class='px-6 py-3 border-x border-x-neutral-400 text-center text-gray-400 text-lg'>
+        ${totalStudentPercentage} %
+      </td>
+      <td class='px-6 py-3 border-x border-x-neutral-400 text-center text-gray-400 text-xl'>
+        ${percentageTransmutated} %
+      </td>
+      <td class='px-6 py-3 border-x border-x-neutral-400 text-center  text-xl'>
+        ${studentRemark}
+      </td>
+    `;
+
+    FG_TableBody.appendChild(FG_TableBodyRow);
+
+    change_bg = !change_bg;
+  }
+
+  FG_Header.appendChild(FG_HeaderButton);
+
+  FG_Component.appendChild(FG_Header);
+
+  FG_Table.appendChild(FG_TableHeader);
+  FG_Table.appendChild(FG_TableBody);
+  FG_Component.appendChild(FG_Table);
+
+  ComponentsList.appendChild(FG_Component);
 }
 
 // OTHER FUNCTIONS
+
+function computeActivityComponents() {
+  const AC_TableBody = document.getElementById(
+    "ActivityComponentsTableBody",
+  ) as HTMLTableSectionElement;
+  const AC_TotalScore = document.getElementById(
+    "ActivityComponentsTotalScore",
+  ) as HTMLTableCellElement;
+
+  let sum = 0;
+  let sumbonus = 0;
+  AC_TableBody.querySelectorAll("tr").forEach((row) => {
+    if (row.getAttribute("data-score")) {
+      sumbonus += parseInt(row.getAttribute("data-score") as string);
+      if (!parseBool(row.getAttribute("data-bonus") as string)) {
+        sum += parseInt(row.getAttribute("data-score") as string);
+      }
+    }
+  });
+
+  AC_TotalScore.innerText = `${sumbonus} / ${sum}`;
+}
+
+function getActivityComponents() {
+  const AC_TableBody = document.getElementById(
+    "ActivityComponentsTableBody",
+  ) as HTMLTableSectionElement;
+  let data: Array<{
+    id: string;
+    name: string;
+    type: string;
+    score: number;
+    bonus: boolean;
+  }> = [];
+  AC_TableBody.querySelectorAll("tr").forEach((row) => {
+    data.push({
+      id: row.getAttribute("data-id") as string,
+      name: row.getAttribute("data-name") as string,
+      type: row.getAttribute("data-type") as string,
+      score: parseInt(row.getAttribute("data-score")!),
+      bonus: parseBool(row.getAttribute("data-bonus")!),
+    });
+  });
+
+  return data;
+}
 
 function LinearScale(
   min: number,
@@ -560,4 +1266,65 @@ function dateFormatter(newdate: Date) {
   });
 
   return dateFormatter.format(newdate);
+}
+
+function setActivityColor(color: string) {
+  ActivityColorRadio.forEach((radioButton) => {
+    radioButton.checked = false;
+
+    if (radioButton.value === color) {
+      radioButton.checked = true;
+
+      ActivityThemeButton.classList.forEach((className) => {
+        if (className.startsWith("bg-")) {
+          ActivityThemeButton.classList.remove(className);
+        }
+      });
+
+      ActivityThemeButton.classList.add(`bg-${color}-500`);
+    }
+  });
+}
+
+function getActivityColor() {
+  let color = "";
+  ActivityColorRadio.forEach((radioButton) => {
+    if (radioButton.checked) {
+      color = radioButton.value;
+    }
+  });
+
+  return color;
+}
+
+function generateElementRandomId() {
+  const prefix = "element";
+  const randomString = Math.random().toString(36).substring(2, 8);
+  return `${prefix}-${randomString}`;
+}
+
+function parseBool(value: string | boolean) {
+  if (typeof value === "boolean") {
+    return value; // If the value is already a boolean, return it as is
+  }
+  if (typeof value === "string") {
+    // Convert common string representations of boolean values
+    const lowerCaseValue = value.toLowerCase();
+    if (
+      lowerCaseValue === "true" ||
+      lowerCaseValue === "1" ||
+      lowerCaseValue === "yes"
+    ) {
+      return true;
+    }
+    if (
+      lowerCaseValue === "false" ||
+      lowerCaseValue === "0" ||
+      lowerCaseValue === "no"
+    ) {
+      return false;
+    }
+  }
+  // Return false for any other non-boolean values
+  return false;
 }
