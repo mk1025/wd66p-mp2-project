@@ -426,7 +426,7 @@ function sectionListDropdown(sections) {
                     data-name='${section.name}'
                     data-color='${section.color}'
                     ${sections.indexOf(section) === 0 ? "checked" : ""}
-                    class='text-${section.color}-500 bg-gray-100 border-gray-300 focus:ring-${section.color}-500 focus:ring-2 dark:bg-gray-700 dark:border-gray-600'
+                    class='text-${section.color}-500 bg-gray-100 border-gray-300 focus:ring-${section.color}-500 focus:ring-2 '
                 />
                 <span>${section.name}</span>
                 <span class='text-sm text-gray-500'>S.Y. ${dateFormatter.format(syStart)} - ${dateFormatter.format(syEnd)}</span>

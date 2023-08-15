@@ -18,6 +18,7 @@
       crossorigin="anonymous"
     ></script>
     <script src="../../node_modules/jquery/dist/jquery.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
 
     <script src="../../dist/classrecords.bundle.js" defer></script>
   </head>
@@ -56,21 +57,21 @@
       >
         <div class="relative w-full max-w-2xl max-h-full">
           <!-- Modal content -->
-          <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+          <div class="relative bg-white rounded-lg shadow">
             <!-- Modal header -->
             <div
-              class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600"
+              class="flex items-start justify-between p-4 border-b rounded-t"
             >
               <h3
                 id="RecordModalTitle"
-                class="text-xl font-semibold text-gray-900 dark:text-white"
+                class="text-xl font-semibold text-gray-900"
               >
                 Add New Class Record
               </h3>
               <button
                 id="RecordModalCloseButton"
                 type="button"
-                class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
+                class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center"
                 data-modal-hide="RecordModal"
               >
                 <i class="fa-regular fa-circle-xmark text-xl"></i>
@@ -168,13 +169,13 @@
             </div>
             <!-- Modal footer -->
             <div
-              class="flex items-center p-6 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600"
+              class="flex items-center p-6 space-x-2 border-t border-gray-200 rounded-b"
             >
               <button
                 id="RecordModalButton"
                 data-modal-hide="RecordModal"
                 type="button"
-                class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
               >
                 Save
               </button>
@@ -182,14 +183,14 @@
                 id="RecordModalCancelButton"
                 data-modal-hide="RecordModal"
                 type="button"
-                class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-600"
+                class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10"
               >
                 Cancel
               </button>
               <div id="RecordModalSpinner" role="status" class="hidden">
                 <svg
                   aria-hidden="true"
-                  class="w-8 h-8 mr-2 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600"
+                  class="w-8 h-8 mr-2 text-gray-200 animate-spin fill-blue-600"
                   viewBox="0 0 100 101"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
@@ -227,21 +228,21 @@
       >
         <div class="relative w-full max-w-2xl max-h-full">
           <!-- Modal content -->
-          <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+          <div class="relative bg-white rounded-lg shadow">
             <!-- Modal header -->
             <div
-              class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600"
+              class="flex items-start justify-between p-4 border-b rounded-t"
             >
               <h3
                 id="ComponentModalTitle"
-                class="text-xl font-semibold text-gray-900 dark:text-white"
+                class="text-xl font-semibold text-gray-900"
               >
                 Add New Component
               </h3>
               <button
                 id="ComponentModalCloseButton"
                 type="button"
-                class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
+                class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center"
                 data-modal-hide="ComponentModal"
                 data-modal-show="RecordModal"
               >
@@ -278,14 +279,14 @@
             </div>
             <!-- Modal footer -->
             <div
-              class="flex items-center p-6 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600"
+              class="flex items-center p-6 space-x-2 border-t border-gray-200 rounded-b"
             >
               <button
                 id="ComponentModalButton"
                 data-modal-hide="ComponentModal"
                 data-modal-show="RecordModal"
                 type="button"
-                class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
               >
                 Save
               </button>
@@ -294,14 +295,14 @@
                 data-modal-hide="ComponentModal"
                 data-modal-show="RecordModal"
                 type="button"
-                class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-600"
+                class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10"
               >
                 Cancel
               </button>
               <div id="ComponentModalSpinner" role="status" class="hidden">
                 <svg
                   aria-hidden="true"
-                  class="w-8 h-8 mr-2 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600"
+                  class="w-8 h-8 mr-2 text-gray-200 animate-spin fill-blue-600"
                   viewBox="0 0 100 101"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
@@ -336,11 +337,11 @@
         class="fixed top-0 left-0 right-0 z-50 hidden p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full"
       >
         <div class="relative w-full max-w-md max-h-full">
-          <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+          <div class="relative bg-white rounded-lg shadow">
             <button
               id="DeleteModalCloseButton"
               type="button"
-              class="absolute top-3 right-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
+              class="absolute top-3 right-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center"
               data-modal-hide="DeleteModal"
             >
               <svg
@@ -362,7 +363,7 @@
             </button>
             <div class="p-6 text-center">
               <svg
-                class="mx-auto mb-4 text-gray-400 w-12 h-12 dark:text-gray-200"
+                class="mx-auto mb-4 text-gray-400 w-12 h-12"
                 aria-hidden="true"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -378,7 +379,7 @@
               </svg>
               <h3
                 id="DeleteModalText"
-                class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400"
+                class="mb-5 text-lg font-normal text-gray-500"
               >
                 ???
               </h3>
@@ -386,7 +387,7 @@
                 id="DeleteModalButton"
                 data-modal-hide="DeleteModal"
                 type="button"
-                class="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center mr-2"
+                class="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center mr-2"
               >
                 Yes, I'm sure
               </button>
@@ -394,7 +395,7 @@
                 id="DeleteModalCancelButton"
                 data-modal-hide="DeleteModal"
                 type="button"
-                class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-600"
+                class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10"
               >
                 No, cancel
               </button>
@@ -410,11 +411,11 @@
         class="fixed top-0 left-0 right-0 z-50 hidden p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full"
       >
         <div class="relative w-full max-w-md max-h-full">
-          <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+          <div class="relative bg-white rounded-lg shadow">
             <button
               id="ErrorModalCloseButton"
               type="button"
-              class="absolute top-3 right-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
+              class="absolute top-3 right-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center"
               data-modal-hide="ErrorModal"
             >
               <svg
@@ -436,7 +437,7 @@
             </button>
             <div class="p-6 text-center">
               <svg
-                class="mx-auto mb-4 text-red-400 w-12 h-12 dark:text-red-400"
+                class="mx-auto mb-4 text-red-400 w-12 h-12"
                 aria-hidden="true"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -452,7 +453,7 @@
               </svg>
               <h3
                 id="ErrorModalText"
-                class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400"
+                class="mb-5 text-lg font-normal text-gray-500"
               >
                 ???
               </h3>
@@ -461,7 +462,7 @@
                 id="ErrorModalOkayButton"
                 data-modal-hide="ErrorModal"
                 type="button"
-                class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-600"
+                class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10"
               >
                 Okay
               </button>
