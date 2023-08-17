@@ -529,6 +529,25 @@ if (isset($_POST['updateRecord'])) {
         $stmt->fetch();
         $stmt->close();
 
+        $query = "DELETE FROM " . TBL_STUDENTS_ACTIVITIES . " WHERE activity_id IN
+        (
+            SELECT uid FROM " . TBL_ACTIVITIES . " WHERE component_id = ?
+        )
+        ";
+        $stmt = $connection->prepare($query);
+        $stmt->bind_param("s", $id);
+        $stmt->execute();
+        $stmt->close();
+
+        $query = "DELETE FROM " . TBL_ACTIVITIES_COMPONENTS . " WHERE activity_id IN 
+        (
+            SELECT uid FROM " . TBL_ACTIVITIES . " WHERE component_id = ?
+        )
+        ";
+        $stmt = $connection->prepare($query);
+        $stmt->bind_param("s", $id);
+        $stmt->execute();
+        $stmt->close();
 
         $queryDeleteActivities = "DELETE FROM " . TBL_ACTIVITIES . " WHERE component_id = ?";
         $stmt = $connection->prepare($queryDeleteActivities);
@@ -590,6 +609,26 @@ if (isset($_POST['deleteRecord'])) {
         echo createResponse(404, "Delete Class Record Error", "Record not found", "Record not found", "");
         exit();
     }
+
+    $query = "DELETE FROM " . TBL_STUDENTS_ACTIVITIES . " WHERE component_id IN
+        (SELECT uid FROM " . TBL_ACTIVITIES_COMPONENTS . " WHERE activity_id IN
+            (SELECT uid FROM " . TBL_ACTIVITIES . " WHERE component_id IN 
+                (SELECT uid FROM " . TBL_RECORDS_COMPONENTS . " WHERE record_id = ?))
+        );
+    ";
+    $stmt = $connection->prepare($query);
+    $stmt->bind_param("s", $postData->id);
+    $stmt->execute();
+    $stmt->close();
+
+    $query = "DELETE FROM " . TBL_ACTIVITIES_COMPONENTS . " WHERE activity_id IN
+        (SELECT uid FROM " . TBL_ACTIVITIES . " WHERE component_id IN
+            (SELECT uid FROM " . TBL_RECORDS_COMPONENTS . " WHERE record_id = ?))
+        ";
+    $stmt = $connection->prepare($query);
+    $stmt->bind_param("s", $postData->id);
+    $stmt->execute();
+    $stmt->close();
 
     $queryActivities = "DELETE FROM " . TBL_ACTIVITIES . " WHERE component_id IN
         (SELECT uid FROM " . TBL_RECORDS_COMPONENTS . " WHERE record_id = ?)";

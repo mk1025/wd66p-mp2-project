@@ -186,6 +186,17 @@ if (isset($_POST['deleteSection'])) {
         exit();
     }
 
+    // DELETE STUDENTS ACTIVITIES FROM TBL_STUDENT_ACTIVITIES
+    $query = "DELETE FROM " . TBL_STUDENTS_ACTIVITIES . " WHERE student_id IN (SELECT uid FROM " . TBL_STUDENTS . " WHERE section_id = '" . $postData->id . "')";
+    $result = $connection->query($query);
+
+    if (!$result) {
+        http_response_code(400);
+        echo createResponse(400, "Delete Failed", "Section not deleted", "", "");
+        exit();
+    }
+
+
     // DELETE STUDENTS THAT REFER TO THE SPECIFIC SECTION
     $query = "DELETE FROM " . TBL_STUDENTS . " WHERE section_id = '" . $postData->id . "'";
     $result = $connection->query($query);
@@ -394,6 +405,16 @@ if (isset($_POST['deleteStudent'])) {
     if (!$postData->section_id || queryOneRowCount(TBL_SECTIONS, "uid", $postData->section_id) == 0) {
         http_response_code(400);
         echo createResponse(400, "Update Failed", "Section not found", "", "");
+        exit();
+    }
+
+    // DELETE STUDENTS ACTIVITIES FROM TBL_STUDENT_ACTIVITIES
+    $query = "DELETE FROM " . TBL_STUDENTS_ACTIVITIES . " WHERE student_id = '" . $postData->student_id . "'";
+    $result = $connection->query($query);
+
+    if (!$result) {
+        http_response_code(400);
+        echo createResponse(400, "Delete Failed", "Student not deleted", "", "");
         exit();
     }
 
