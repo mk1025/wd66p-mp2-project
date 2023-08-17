@@ -35,9 +35,9 @@ if (isset($_POST['session']) && isset($_SESSION["uid"])) {
         echo createResponse(200, "Token Verified", "", "", $data);
         exit();
     }
-    http_response_code(404);
-    echo createResponse(404, "Redirect Error", "Incorrect token", "Incorrect token", "");
-    // session_destroy();
+    http_response_code(403);
+    echo createResponse(403, "Redirect Error", "Incorrect token", "Incorrect token", "");
+    session_destroy();
     exit();
 
 }
@@ -227,6 +227,7 @@ if (isset($_GET['getData'])) {
             $result_activities_components = $result_activities_components->fetch_all(MYSQLI_ASSOC);
             $stmt->close();
 
+            $placeholder_activities_components = [];
             foreach ($result_activities_components as $activities_component) {
 
                 $placeholder_activities_components[] = [
@@ -467,9 +468,9 @@ if (isset($_POST['addActivity'])) {
         $newActivityComponentUID = "";
         do {
             $newActivityComponentUID = generateUID(6) . "-" . generateUID(6);
-            $query = "SELECT uid FROM " . TBL_ACTIVITIES_COMPONENTS . " WHERE uid = ?";
+            $query = "SELECT uid FROM " . TBL_ACTIVITIES_COMPONENTS . " WHERE uid = ? AND activity_id = ?";
             $stmt = $connection->prepare($query);
-            $stmt->bind_param("s", $newActivityComponentUID);
+            $stmt->bind_param("ss", $newActivityComponentUID, $newActivityUID);
             $stmt->execute();
             $result = $stmt->get_result();
             $stmt->close();
@@ -753,28 +754,31 @@ if (isset($_POST['updateActivity'])) {
                     $stmt->close();
                 }
 
-                $NewComponents = array_push($NewComponents, $newActivityComponentUID);
+                array_push($NewComponents, $newActivityComponentUID);
             } else {
                 // Update the Activity Component by its name and activity ID
                 $query = "UPDATE " . TBL_ACTIVITIES_COMPONENTS . " SET
                     component_name = ?,
                     component_type = ?,
                     score = ?,
-                    bonus = ?
+                    bonus = ?,
                     updated_at = NOW()
                     WHERE component_name = ? AND activity_id = ?";
                 $stmt = $connection->prepare($query);
                 $stmt->bind_param("ssssss", $component->name, $component->type, $component->score, $component->bonus, $component->name, $postData->activity_id);
                 $stmt->execute();
                 $stmt->close();
+
+                // Get the ID of the updated Activity Component
+                $query = "SELECT uid FROM " . TBL_ACTIVITIES_COMPONENTS . " WHERE component_name = ? AND activity_id = ? LIMIT 1";
+                $stmt = $connection->prepare($query);
+                $stmt->bind_param("ss", $component->name, $postData->activity_id);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                $stmt->close();
+
+                array_push($NewComponents, $result->fetch_assoc()["uid"]);
             }
-
-
-
-
-
-
-
         } else {
             $query = "UPDATE " . TBL_ACTIVITIES_COMPONENTS . " SET 
                 component_name = ?,
@@ -788,17 +792,229 @@ if (isset($_POST['updateActivity'])) {
             $stmt->execute();
             $stmt->close();
 
-            $NewComponents = array_push($NewComponents, $component->id);
+            array_push($NewComponents, $component->id);
+
         }
     }
 
+    $AllComponents = [];
+
     // Get The Activity Components based on the Activity ID
     $query = "SELECT * FROM " . TBL_ACTIVITIES_COMPONENTS . " WHERE activity_id = ?";
+    $stmt = $connection->prepare($query);
+    $stmt->bind_param("s", $postData->activity_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    while ($row = $result->fetch_assoc()) {
+        array_push($AllComponents, $row);
+    }
+
+    $stmt->close();
+
+    // Delete Components that are not from New Components
+    foreach ($AllComponents as $component) {
+        if (!in_array($component["uid"], $NewComponents)) {
+            // Delete the Activity Component from Students Activities based on the component's ID
+            $query = "DELETE FROM " . TBL_STUDENTS_ACTIVITIES . " WHERE component_id = ? AND activity_id = ?";
+            $stmt = $connection->prepare($query);
+            $stmt->bind_param("ss", $component["uid"], $postData->activity_id);
+            $stmt->execute();
+            $stmt->close();
+
+            // Then delete the Activity Component
+            $query = "DELETE FROM " . TBL_ACTIVITIES_COMPONENTS . " WHERE uid = ? AND activity_id = ?";
+            $stmt = $connection->prepare($query);
+            $stmt->bind_param("ss", $component["uid"], $postData->activity_id);
+            $stmt->execute();
+            $stmt->close();
+        }
+    }
+
 
 
     http_response_code(200);
     echo createResponse(200, "Update Activity Successful", "", "", "");
     exit();
+}
+
+if (isset($_POST['updateStudentActivity'])) {
+    /*
+        Data Schema (updateStudentActivity) : {
+            token: string,
+            data: {
+                record_id: string,
+                component_id: string,
+                student_id: string,
+                activity_id: string,
+                activities: [{
+                    component_id: string,
+                    student_score: number
+                }]
+            }
+        }
+    */
+    $postData = json_decode($_POST['updateStudentActivity']);
+
+    if (empty($postData) || $postData === null) {
+        http_response_code(400);
+        echo createResponse(400, "Update Student Activity Error", "No Data Provided", "", "");
+        exit();
+    }
+    if (empty($postData->token) || $postData->token === null) {
+        http_response_code(403);
+        echo createResponse(403, "Page Error", "No Token Provided", "", "");
+        exit();
+    }
+    if (hash("sha256", $_SESSION["uid"]) !== $postData->token) {
+        http_response_code(403);
+        echo createResponse(403, "Page Error", "Forbidden Request", "Incorrect token", "");
+        session_destroy();
+        exit();
+    }
+    if (empty($postData->data) || $postData->data === null) {
+        http_response_code(400);
+        echo createResponse(400, "Update Student Activity Error", "No Data Provided", "", "");
+        exit();
+    }
+
+    $postData = $postData->data;
+
+    if (empty($postData->record_id) || $postData->record_id === null) {
+        http_response_code(400);
+        echo createResponse(400, "Update Student Activity Error", "No Record ID Provided", "", "");
+        exit();
+    }
+    if (empty($postData->component_id) || $postData->component_id === null) {
+        http_response_code(400);
+        echo createResponse(400, "Update Student Activity Error", "No Component ID Provided", "", "");
+        exit();
+    }
+    if (empty($postData->student_id) || $postData->student_id === null) {
+        http_response_code(400);
+        echo createResponse(400, "Update Student Activity Error", "No Student ID Provided", "", "");
+        exit();
+    }
+    if (empty($postData->activity_id) || $postData->activity_id === null) {
+        http_response_code(400);
+        echo createResponse(400, "Update Student Activity Error", "No Activity ID Provided", "", "");
+        exit();
+    }
+    if (empty($postData->activities) || $postData->activities === null) {
+        http_response_code(400);
+        echo createResponse(400, "Update Student Activity Error", "No Activities Provided", "", "");
+        exit();
+    }
+
+    foreach ($postData->activities as $activity) {
+        if (empty($activity->component_id) || $activity->component_id === null) {
+            http_response_code(400);
+            echo createResponse(400, "Update Student Activity Error", "No Component ID Provided", "", "");
+            exit();
+        }
+        if (!isset($activity->student_score) || $activity->student_score === "") {
+            http_response_code(400);
+            echo createResponse(400, "Update Student Activity Error", "No Student Score Provided", "", "");
+            exit();
+        }
+    }
+
+    // Check if Class Record exist based on Record ID
+    $query = "SELECT * FROM " . TBL_RECORDS . " WHERE uid = ? LIMIT 1";
+    $stmt = $connection->prepare($query);
+    $stmt->bind_param("s", $postData->record_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $stmt->close();
+
+    if ($result->num_rows === 0) {
+        http_response_code(404);
+        echo createResponse(404, "Update Student Activity Error", "Record Not Found", "", "");
+        exit();
+    }
+
+    // Check if Class Record Component based on Component ID and Class Record ID
+    $query = "SELECT * FROM " . TBL_RECORDS_COMPONENTS . " WHERE uid = ? AND record_id = ? LIMIT 1";
+    $stmt = $connection->prepare($query);
+    $stmt->bind_param("ss", $postData->component_id, $postData->record_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $stmt->close();
+
+    if ($result->num_rows === 0) {
+        http_response_code(404);
+        echo createResponse(404, "Update Student Activity Error", "Component Not Found", "", "");
+        exit();
+    }
+
+    // Check if Activity exist based on Class Record Component ID and Activity ID
+    $query = "SELECT * FROM " . TBL_ACTIVITIES . " WHERE uid = ? AND component_id = ? LIMIT 1";
+    $stmt = $connection->prepare($query);
+    $stmt->bind_param("ss", $postData->activity_id, $postData->component_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $stmt->close();
+
+    if ($result->num_rows === 0) {
+        http_response_code(404);
+        echo createResponse(404, "Update Student Activity Error", "Activity Not Found", "", "");
+        exit();
+    }
+
+    // Check if Activity Component ID exist based on Activity ID and the Activity Component ID
+    foreach ($postData->activities as $activity) {
+        $query = "SELECT * FROM " . TBL_ACTIVITIES_COMPONENTS . " WHERE uid = ? AND activity_id = ? LIMIT 1";
+        $stmt = $connection->prepare($query);
+        $stmt->bind_param("ss", $activity->component_id, $postData->activity_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $stmt->close();
+
+        if ($result->num_rows === 0) {
+            http_response_code(404);
+            echo createResponse(404, "Update Student Activity Error", "Activity Component Not Found", "", "");
+            exit();
+        }
+    }
+
+    // Update
+    foreach ($postData->activities as $activity) {
+        // $query = "UPDATE " . TBL_STUDENTS_ACTIVITIES . " SET score = ?, updated_at = NOW() WHERE component_id = ? AND activity_id = ? AND student_id = ?";
+        // $stmt = $connection->prepare($query);
+        // $stmt->bind_param("ssss", $activity->student_score, $activity->component_id, $postData->activity_id, $postData->student_id);
+        // $stmt->execute();
+        // $stmt->close();
+
+        // 
+
+        // Update and get affected rows
+        $query = "UPDATE " . TBL_STUDENTS_ACTIVITIES . " SET score = ?, updated_at = NOW() WHERE component_id = ? AND activity_id = ? AND student_id = ?";
+        $stmt = $connection->prepare($query);
+        $stmt->bind_param("ssss", $activity->student_score, $activity->component_id, $postData->activity_id, $postData->student_id);
+        $stmt->execute();
+        $affectedRows = $stmt->affected_rows;
+        $stmt->close();
+
+
+        if ($affectedRows === 0) {
+            // Insert Instead
+
+            $query = "INSERT INTO " . TBL_STUDENTS_ACTIVITIES . " (component_id, activity_id, student_id, score, created_at, updated_at) VALUES (?, ?, ?, ?, NOW(), NOW())";
+            $stmt = $connection->prepare($query);
+            $stmt->bind_param("ssss", $activity->component_id, $postData->activity_id, $postData->student_id, $activity->student_score);
+            $stmt->execute();
+            $stmt->close();
+
+        }
+
+
+    }
+
+    http_response_code(200);
+    echo createResponse(200, "Update Student Activity Successful", "", "", "");
+    exit();
+
+
 }
 
 if (isset($_POST['deleteActivity'])) {

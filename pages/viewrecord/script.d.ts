@@ -22,8 +22,12 @@ export interface InterfaceStudent {
   activities: [
     {
       id: string;
-      component_id: string;
-      score: number | string;
+      components: [
+        {
+          id: string;
+          score: number;
+        },
+      ];
     },
   ];
 }
@@ -77,8 +81,12 @@ export interface InterfaceRecord {
       activities: [
         {
           id: string;
-          component_id: string;
-          score: number | string;
+          components: [
+            {
+              id: string;
+              score: number;
+            },
+          ];
         },
       ];
     },

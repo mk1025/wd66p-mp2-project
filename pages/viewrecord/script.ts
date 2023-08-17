@@ -103,6 +103,29 @@ const ActivityComponentModalButton = document.getElementById(
   "ActivityComponentModalButton",
 ) as HTMLButtonElement;
 
+const StudentActivityModal = new Modal(
+  document.getElementById("StudentActivityModal"),
+  {
+    closable: false,
+    onShow: () => {
+      document.getElementById("StudentActivityModalCloseButton")!.onclick =
+        () => {
+          StudentActivityModal.hide();
+        };
+      document.getElementById("StudentActivityModalCancelButton")!.onclick =
+        () => {
+          StudentActivityModal.hide();
+        };
+    },
+  },
+);
+const StudentActivityModalTitle = document.getElementById(
+  "StudentActivityModalTitle",
+) as HTMLHeadingElement;
+const StudentActivityModalButton = document.getElementById(
+  "StudentActivityModalButton",
+) as HTMLButtonElement;
+
 const DeleteModal = new Modal(document.getElementById("DeleteModal"), {
   closable: false,
   onShow: () => {
@@ -433,7 +456,101 @@ function editStudentActivity(
       component_id,
     });
 
-  ActivityModal.show();
+  const ActivityComponentList = document.getElementById(
+    "StudentActivityTableBody",
+  ) as HTMLTableSectionElement;
+
+  ActivityComponentList.innerHTML = "";
+
+  let componentScoreTotal = 0;
+  let componentScoreTotalBonus = 0;
+  for (let component of activity.components) {
+    const ComponentRow = document.createElement("tr");
+    ComponentRow.setAttribute("id", component.id);
+    ComponentRow.setAttribute("data-id", component.id);
+    ComponentRow.setAttribute("data-name", component.name);
+    ComponentRow.setAttribute("data-type", component.type);
+    ComponentRow.setAttribute("data-score", component.score.toString());
+    ComponentRow.setAttribute(
+      "data-bonus",
+      parseBool(component.bonus).toString(),
+    );
+
+    let findStudentScore = 0;
+    for (let activity of student.activities) {
+      for (let activityComponents of activity.components) {
+        if (activityComponents.id === component.id) {
+          findStudentScore = activityComponents.score;
+        }
+      }
+    }
+    // console.log(findStudentScore);
+
+    ComponentRow.innerHTML += `
+      <td class='px-6 py-2'>${component.name}</td>
+      <td class='px-6 py-2'>${component.type}</td>
+      <td class='px-6 py-2 text-center'>
+        <input 
+          class='rounded'
+          type='number'
+          min='0'
+          max='${component.score}'
+          step='1'
+          value='${findStudentScore}'
+          oninput='this.value=Math.abs(this.value)'
+        />
+      </td>
+      <td class='px-6 py-2 text-center'>${component.score}</td>
+      <td class='px-6 py-2 text-center'>${
+        parseBool(component.bonus.toString()) ? "Yes" : "No"
+      }</td>
+    `;
+
+    componentScoreTotal += !parseBool(component.bonus.toString())
+      ? (component.score as number)
+      : 0;
+    componentScoreTotalBonus += component.score as number;
+
+    ActivityComponentList.appendChild(ComponentRow);
+  }
+
+  ActivityComponentList.querySelectorAll("tr td input").forEach((input) => {
+    (input as HTMLInputElement).addEventListener("input", () => {
+      let totalscore = 0;
+      ActivityComponentList.querySelectorAll("tr td input").forEach((input) => {
+        totalscore += parseInt((input as HTMLInputElement).value);
+      });
+      document.getElementById("StudentActivityStudentTotalScore")!.innerText =
+        totalscore.toString();
+    });
+  });
+
+  document.getElementById(
+    "StudentActivityTotalScore",
+  )!.innerText = `${componentScoreTotal} / ${componentScoreTotalBonus}`;
+
+  StudentActivityModalButton.onclick = () => {
+    StudentActivityModal.hide();
+
+    // ENABLE_CONSOLELOG &&
+    //   console.log("TEST: ", {
+    //     record_id: record_id,
+    //     component_id: component_id,
+    //     student_id: student.id,
+    //     activity_id: activity.id,
+    //     activites: getStudentActivityComponentScores(),
+    //   });
+
+    sendData("updateStudentActivity", {
+      record_id: record_id,
+      component_id: component_id,
+      student_id: student.id,
+      activity_id: activity.id,
+      activities: getStudentActivityComponentScores(),
+    });
+  };
+
+  StudentActivityModal.show();
 }
 
 // AJAX
@@ -872,9 +989,17 @@ function populateComponentList(record: dts.InterfaceRecord) {
         );
 
         let studentScore = 0;
+        // for (let studentActivity of student.activities) {
+        //   if (studentActivity.id === activity.id) {
+        //     studentScore += parseInt(studentActivity.score as string) || 0;
+        //   }
+        // }
+
         for (let studentActivity of student.activities) {
           if (studentActivity.id === activity.id) {
-            studentScore += parseInt(studentActivity.score as string) || 0;
+            studentActivity.components.forEach((component) => {
+              studentScore += (component.score as number) || 0;
+            });
           }
         }
 
@@ -887,7 +1012,7 @@ function populateComponentList(record: dts.InterfaceRecord) {
         );
 
         TableDataButton.onclick = () => {
-          editStudentActivity(record.id, activity, student, activity.id);
+          editStudentActivity(record.id, activity, student, component.id);
         };
 
         TableData.appendChild(TableDataButton);
@@ -1122,9 +1247,17 @@ function populateComponentList(record: dts.InterfaceRecord) {
       }
 
       let studentSum = 0;
+      let collectRecordActivities: Array<string> = [];
+      component.activities.forEach((activity) => {
+        activity.components.forEach((component) => {
+          collectRecordActivities.push(component.id);
+        });
+      });
       for (let activity of student.activities) {
-        if (activity.component_id == component.id) {
-          studentSum += parseInt(activity.score as string) || 0;
+        for (let activityComponent of activity.components) {
+          if (collectRecordActivities.includes(activityComponent.id)) {
+            studentSum += activityComponent.score || 0;
+          }
         }
       }
 
@@ -1134,7 +1267,7 @@ function populateComponentList(record: dts.InterfaceRecord) {
           100,
           0,
           parseInt(component.score as string) || 0,
-          studentSum / componentSum,
+          (studentSum / componentSum) * 100,
         ) || 0;
 
       componentScoreList.push(totalWeighted);
@@ -1142,7 +1275,9 @@ function populateComponentList(record: dts.InterfaceRecord) {
 
     for (let score of componentScoreList) {
       FG_TableBodyRow.innerHTML += `
-        <td class='px-6 py-3 border-x border-x-neutral-400 text-center text-gray-400'>${score}%</td>
+        <td class='px-6 py-3 border-x border-x-neutral-400 text-center text-gray-400'>${score.toFixed(
+          2,
+        )}%</td>
       `;
     }
 
@@ -1173,10 +1308,10 @@ function populateComponentList(record: dts.InterfaceRecord) {
 
     FG_TableBodyRow.innerHTML += `
       <td class='px-6 py-3 border-x border-x-neutral-400 text-center text-gray-400 text-lg'>
-        ${totalStudentPercentage} %
+        ${totalStudentPercentage.toFixed(2)} %
       </td>
       <td class='px-6 py-3 border-x border-x-neutral-400 text-center text-gray-400 text-xl'>
-        ${percentageTransmutated} %
+        ${percentageTransmutated.toFixed(2)} %
       </td>
       <td class='px-6 py-3 border-x border-x-neutral-400 text-center  text-xl'>
         ${studentRemark}
@@ -1241,6 +1376,31 @@ function getActivityComponents() {
       type: row.getAttribute("data-type") as string,
       score: parseInt(row.getAttribute("data-score")!),
       bonus: parseBool(row.getAttribute("data-bonus")!),
+    });
+  });
+
+  return data;
+}
+
+function getStudentActivityComponentScores() {
+  const TableBody = document.getElementById(
+    "StudentActivityTableBody",
+  ) as HTMLTableSectionElement;
+
+  let data: Array<{
+    component_id: string;
+    student_score: number;
+  }> = [];
+
+  TableBody.querySelectorAll("tr").forEach((row) => {
+    let findInput = row.querySelectorAll("td input");
+    let score = 0;
+    findInput.forEach((input) => {
+      score = parseInt((input as HTMLInputElement).value);
+    });
+    data.push({
+      component_id: row.getAttribute("data-id") as string,
+      student_score: score,
     });
   });
 
