@@ -1,4 +1,4 @@
-import * as Routes from "../../scripts/routes.js";
+import * as Routes from "../../scripts/routes";
 
 const login_ExitButton = document.getElementById(
   "Homepage_Button",

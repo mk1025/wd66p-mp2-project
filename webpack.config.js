@@ -20,7 +20,7 @@ module.exports = {
     extensions: [".ts", ".js"], // Resolve TypeScript and JavaScript files
     alias: {
       flowbite: path.resolve(__dirname, "node_modules/flowbite"),
-      "@scripts": path.resolve(__dirname, "./scripts"), // Alias for common scripts folder
+      "@scripts": path.resolve(__dirname, "./dist/js/scripts"), // Alias for common scripts folder
     },
   },
   module: {

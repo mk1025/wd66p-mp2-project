@@ -1,4 +1,4 @@
-import * as Routes from "../../scripts/routes.js";
+import * as Routes from "../../scripts/routes";
 import * as dts from "./script.d";
 
 // @ts-ignore

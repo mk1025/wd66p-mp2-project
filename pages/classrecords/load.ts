@@ -1,4 +1,4 @@
-import * as Routes from "../../scripts/routes.js";
+import * as Routes from "../../scripts/routes";
 
 document.addEventListener("DOMContentLoaded", function () {
   let token = sessionStorage.getItem("token") ?? "";

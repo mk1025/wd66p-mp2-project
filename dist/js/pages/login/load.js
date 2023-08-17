@@ -1,5 +1,5 @@
-import * as Routes from "../../scripts/routes.js";
-import handleResponseData from "./script.js";
+import * as Routes from "../../scripts/routes";
+import handleResponseData from "./script";
 document.addEventListener("DOMContentLoaded", function () {
     var _a;
     let token = (_a = sessionStorage.getItem("token")) !== null && _a !== void 0 ? _a : "";

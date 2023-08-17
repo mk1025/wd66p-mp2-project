@@ -1,4 +1,4 @@
-import * as Routes from "../../scripts/routes.js";
+import * as Routes from "../../scripts/routes";
 import { Modal } from "flowbite";
 const ActionSpinner = document.getElementById("Action-Spinner");
 const AddNewRecordButton = document.getElementById("AddNewRecordButton");

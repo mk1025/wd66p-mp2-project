@@ -1,4 +1,4 @@
-import * as Routes from "../../scripts/routes.js";
+import * as Routes from "../../scripts/routes";
 import { Modal } from "flowbite";
 const SectionModal = new Modal(document.getElementById("SectionModal"), {
     closable: false,

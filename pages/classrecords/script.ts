@@ -1,4 +1,4 @@
-import * as Routes from "../../scripts/routes.js";
+import * as Routes from "../../scripts/routes";
 // @ts-ignore
 import { Modal } from "flowbite";
 

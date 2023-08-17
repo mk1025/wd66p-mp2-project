@@ -1,6 +1,6 @@
-import * as Environment from "../../scripts/env.js";
-import * as Routes from "../../scripts/routes.js";
-import * as RegEx from "../../scripts/regex.js";
+import * as Environment from "../../scripts/env";
+import * as Routes from "../../scripts/routes";
+import * as RegEx from "../../scripts/regex";
 
 const profileUploadBtn = document.getElementById(
   "profile_upload",
