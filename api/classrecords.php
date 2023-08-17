@@ -203,7 +203,7 @@ if (isset($_GET['populateRecords'])) {
 
                 $queryActivities = "SELECT COUNT(*) as activities FROM " . TBL_ACTIVITIES . " WHERE component_id = ?";
                 $stmt = $connection->prepare($queryActivities);
-                $stmt->bind_param("s", $id);
+                $stmt->bind_param("s", $component["id"]);
                 $stmt->execute();
 
                 $stmt->bind_result($activities);
