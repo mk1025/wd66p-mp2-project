@@ -105,6 +105,7 @@ if ($result->num_rows === 0) {
         lowest INT(11) NOT NULL,
         passing INT(11) NOT NULL,
         highest INT(11) NOT NULL,
+        is_default BOOLEAN DEFAULT FALSE NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (teacher_uid) REFERENCES users(uid)
