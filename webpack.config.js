@@ -2,6 +2,7 @@ const path = require("path");
 
 module.exports = {
   entry: {
+    home: ["./scripts/home.ts"],
     login: ["./pages/login/script.ts"],
     register: ["./pages/registration/script.ts"],
     students: ["./pages/students/script.ts", "./pages/students/load.ts"],
