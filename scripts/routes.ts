@@ -4,6 +4,9 @@ export const LOGIN_API = "../../api/login.php";
 export const STUDENTS_API = "../../api/students.php";
 export const CLASSRECORDS_API = "../../api/classrecords.php";
 export const VIEWRECORD_API = "../../api/viewrecord.php";
+export const TRANSMUTATIONS_API = "../../api/transmutations.php";
+
+export const SESSIONS_API = "../../api/session.php";
 
 // PAGES
 export const HOME_PAGE = "../../";
@@ -25,3 +28,6 @@ export const CLASSRECORDS_PAGE_FROM_HOME = "./pages/classrecords/";
 
 export const VIEWRECORD_PAGE = "../viewrecord";
 export const VIEWRECORD_PAGE_FROM_HOME = "./pages/viewrecord/";
+
+export const TRANSMUTATIONS_PAGE = "../transmutations";
+export const TRANSMUTATIONS_PAGE_FROM_HOME = "./pages/transmutations/";
