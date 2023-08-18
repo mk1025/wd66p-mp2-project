@@ -12,6 +12,7 @@ if (isset($_POST['login'])) {
         !queryOneRowCount(TBL_USERS, "email", strtolower($postData->credential)) &&
         !queryOneRowCount(TBL_USERS, "username", strtolower($postData->credential))
     ) {
+        http_response_code(400);
         echo createResponse(400, "Login Error", "Account does not exist", "Account does not exist", "");
         $connection->close();
         exit();
@@ -43,5 +44,3 @@ if (isset($_POST['login'])) {
         exit();
     }
 }
-
-include_once "session.php";
