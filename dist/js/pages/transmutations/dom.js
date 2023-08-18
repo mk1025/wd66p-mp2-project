@@ -4,6 +4,7 @@ export const PROFILE_LASTNAME = document.getElementById("Profile_LastName");
 export const PROFILE_PHOTO = document.getElementById("Profile_Photo");
 export const NEW_TRANSMUTATION_BUTTON = document.getElementById("AddNewTransmutationButton");
 export const LOGOUT_BUTTON = document.getElementById("LogoutButton");
+export const TRANSMUTATION_LIST = document.getElementById("TransmutationList");
 const TRANSMUTATION_MODAL_DIV = document.getElementById("TransmutationModal");
 const TRANSMUTATION_MODAL_INIT = new Modal(TRANSMUTATION_MODAL_DIV, {
     closable: false,
