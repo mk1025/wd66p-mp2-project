@@ -1,4 +1,4 @@
-import * as Routes from "./routes.js";
+import * as Routes from "./routes";
 const Register_Button = document.getElementById("Register_Button");
 const Login_Button = document.getElementById("Login_Button");
 const ForStudents_Button = document.getElementById("ForStudents_Button");

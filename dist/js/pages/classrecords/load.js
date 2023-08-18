@@ -31,7 +31,7 @@ document.addEventListener("DOMContentLoaded", function () {
             console.error("(Error) Status: ", status);
             console.error("Error: ", error);
             console.groupEnd();
-            if (error)
+            if (xhr.status === 403)
                 window.location.href = Routes.LOGIN_PAGE;
         },
     });
