@@ -2,7 +2,7 @@ const path = require("path");
 
 module.exports = {
   entry: {
-    login: ["./pages/login/script.ts", "./pages/login/load.ts"],
+    login: ["./pages/login/script.ts"],
     register: ["./pages/registration/script.ts"],
     students: ["./pages/students/script.ts", "./pages/students/load.ts"],
     classrecords: [
@@ -10,6 +10,7 @@ module.exports = {
       "./pages/classrecords/load.ts",
     ],
     viewrecord: ["./pages/viewrecord/script.ts"],
+    transmutation: ["./pages/transmutations/script.ts"],
   },
   output: {
     filename: "[name].bundle.js", // Output filename based on entry point name
