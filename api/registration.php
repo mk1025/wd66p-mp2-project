@@ -167,9 +167,10 @@ function createNewUser($data)
                     lowest,
                     passing,
                     highest,
+                    is_default,
                     created_at,
                     updated_at
-                ) VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW());";
+                ) VALUES (?, ?, ?, ?, ?, ?, 1, NOW(), NOW());";
 
                 $stmt = $connection->prepare($query);
                 $stmt->bind_param(
