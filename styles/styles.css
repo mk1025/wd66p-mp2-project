@@ -1802,11 +1802,6 @@ input:checked + .toggle-bg {
   border-bottom-color: rgb(163 163 163 / var(--tw-border-opacity));
 }
 
-.border-t-neutral-100 {
-  --tw-border-opacity: 1;
-  border-top-color: rgb(245 245 245 / var(--tw-border-opacity));
-}
-
 .border-t-neutral-400 {
   --tw-border-opacity: 1;
   border-top-color: rgb(163 163 163 / var(--tw-border-opacity));
@@ -2059,6 +2054,10 @@ input:checked + .toggle-bg {
 
 .p-20 {
   padding: 5rem;
+}
+
+.p-3 {
+  padding: 0.75rem;
 }
 
 .p-4 {

@@ -4,229 +4,277 @@ include_once "config.php";
 
 session_start();
 
-if (isset($_POST['session']) && isset($_SESSION["uid"])) {
-    /*
-         ! DO NOT CLOSE THE DB CONNECTION HERE
-         ! check $connection variable at config.php
-     */
-    $postData = json_decode($_POST['session']);
+class ClassRecords extends Functions
+{
+    private $request;
+    private $data;
+    private $token;
 
-    if (hash("sha256", $_SESSION["uid"]) == $postData->token) {
+    public function __construct($request = null)
+    {
+        if (!isset($_SESSION["uid"])) {
+            http_response_code(403);
+            echo createResponse(403, "Page Error", "Forbidden Access to Page", "Incorrect token", "");
+            exit();
+        }
+        if (empty($request) || $request === null) {
+            http_response_code(400);
+            echo parent::createResponse(400, "Request Error", "Request is Empty", "Request is Empty", "");
+            exit();
+        }
+        $this->request = $request;
+    }
 
-        $query = "SELECT first_name as firstName, last_name as lastName, image_path as imagePath FROM " . TBL_USERS . "  WHERE uid = ?";
+    public function Index()
+    {
+        global $connection;
+
+        $this->TokenCheck($this->request);
+
+        $query = "SELECT uid as id, transmutation_id, section_id, name as record_name FROM " . TBL_RECORDS . " WHERE teacher_uid = ? ORDER BY updated_at DESC";
         $stmt = $connection->prepare($query);
         $stmt->bind_param("s", $_SESSION["uid"]);
         $stmt->execute();
-
         $result = $stmt->get_result();
+        $stmt->close();
 
         $result = $result->fetch_all(MYSQLI_ASSOC);
 
-        $stmt->close();
+        $data = [];
+        foreach ($result as $row) {
+            $data[] = [
+                "id" => $row["id"],
+                "name" => $row["record_name"],
+                "section" => $this->getSection($row["section_id"]),
+                "transmutation" => $this->getTransmutation($row["transmutation_id"]),
+                "components" => $this->getComponents($row["id"]),
+            ];
+        }
 
-        $data = array(
-            "redirect" => true,
-            "user" => array(
-                "firstName" => ucwords($result[0]["firstName"]),
-                "lastName" => ucwords($result[0]["lastName"]),
-                "imagePath" => $result[0]["imagePath"]
-            )
-        );
-        echo createResponse(200, "Token Verified", "", "", $data);
-        exit();
-    }
-    http_response_code(404);
-    echo createResponse(404, "Redirect Error", "Incorrect token", "Incorrect token", "");
-    // session_destroy();
-    exit();
-
-}
-
-if (isset($_GET['getSections'])) {
-    $getData = json_decode($_GET['getSections']);
-
-    if (hash("sha256", $_SESSION["uid"]) !== $getData->token) {
-        http_response_code(404);
-        echo createResponse(404, "Redirect Error", "Incorrect token", "Incorrect token", "");
-        session_destroy();
+        http_response_code(200);
+        echo createResponse(200, "GET Records Successful", "", "", $data);
         exit();
     }
 
-    $query = "SELECT uid as id, section_name as name, sy_start as syStart, sy_end as syEnd, color FROM " . TBL_SECTIONS . " WHERE teacher_uid = '" . $_SESSION["uid"] . "'";
-    $result = $connection->query($query);
-
-    $result = $result->fetch_all(MYSQLI_ASSOC);
-
-    http_response_code(200);
-    echo createResponse(200, "GET Sections Successful", "", "", $result);
-    exit();
-
-}
-
-if (isset($_GET['populateRecords'])) {
-    $getData = json_decode($_GET['populateRecords']);
-
-    if (hash("sha256", $_SESSION["uid"]) !== $getData->token) {
-        http_response_code(403);
-        echo createResponse(403, "Redirect Error", "Incorrect token", "Incorrect token", "");
-        session_destroy();
-        exit();
-    }
-
-    /*
-    Data Schema
+    public function Store()
     {
-      "data": [{
-        "id": string,
-        "record_name": string,
-        "section_id": string,
-        "section_name": string,
-        "syStart": string,
-        "syEnd": string,
-        "transmutation": {
-          "id": string,
-          "name": string,
-          "lowest": number,
-          "passing": number,
-          "highest": number
-        }
-        "color": string,
-        "components": [{
-          "id": string,
-          "component_name": string,
-          "component_score": number,
-          "activities": number,
-        }]
-      }]
+        global $connection;
     }
-  */
 
-    $data = [];
+    public function Sections()
+    {
+        global $connection;
 
-    $query = "SELECT uid as id, section_id, transmutation_id, name FROM " . TBL_RECORDS . " WHERE teacher_uid = ? ORDER BY updated_at DESC";
-    $stmt = $connection->prepare($query);
-    $stmt->bind_param("s", $_SESSION["uid"]);
-    $stmt->execute();
+        $this->TokenCheck($this->request);
 
-    $result = $stmt->get_result();
-
-    if ($result->num_rows > 0) {
-
-        $records = $result->fetch_all(MYSQLI_ASSOC);
-
+        $query = "SELECT uid as id, section_name as name, sy_start as syStart, sy_end as syEnd, color FROM " . TBL_SECTIONS . " WHERE teacher_uid = ?";
+        $stmt = $connection->prepare($query);
+        $stmt->bind_param("s", $_SESSION["uid"]);
+        $stmt->execute();
+        $result = $stmt->get_result();
         $stmt->close();
 
-        foreach ($records as $record) {
-            $placeholder = [
-                "id" => $record["id"],
-                "record_name" => $record["name"],
-                "section_id" => $record["section_id"],
-                "transmutation" => [],
-                "components" => []
-            ];
+        $result = $result->fetch_all(MYSQLI_ASSOC);
 
-            $querySection = "SELECT section_name as name, color, sy_start, sy_end FROM " . TBL_SECTIONS . " WHERE uid = ? LIMIT 1";
-            $stmt = $connection->prepare($querySection);
-            $stmt->bind_param("s", $record["section_id"]);
-            $stmt->execute();
-            $stmt->bind_result($name, $color, $sy_start, $sy_end);
-
-            $stmt->fetch();
-
-            $resultSection = array(
-                "name" => $name,
-                "color" => $color,
-                "sy_start" => $sy_start,
-                "sy_end" => $sy_end
-            );
-
-            $stmt->close();
-
-            $placeholder["section_name"] = $resultSection["name"];
-            $placeholder["color"] = $resultSection["color"];
-            $placeholder["syStart"] = $resultSection["sy_start"];
-            $placeholder["syEnd"] = $resultSection["sy_end"];
-
-            $queryTransmutation = "SELECT name, lowest, passing, highest FROM " . TBL_TRANSMUTATIONS . " WHERE uid = ? LIMIT 1";
-            $stmt = $connection->prepare($queryTransmutation);
-            $stmt->bind_param("s", $record["transmutation_id"]);
-            $stmt->execute();
-            $stmt->bind_result($name, $lowest, $passing, $highest);
-
-            $stmt->fetch();
-
-            $resultTransmutation = array(
-                "name" => $name,
-                "lowest" => $lowest,
-                "passing" => $passing,
-                "highest" => $highest
-            );
-
-            $stmt->close();
-
-
-            $placeholder["transmutation"] = [
-                "id" => $record["transmutation_id"],
-                "name" => $resultTransmutation["name"],
-                "lowest" => $resultTransmutation["lowest"],
-                "passing" => $resultTransmutation["passing"],
-                "highest" => $resultTransmutation["highest"]
-            ];
-
-
-            $queryComponents = "SELECT uid as id, component_name, score FROM " . TBL_RECORDS_COMPONENTS . " WHERE record_id = ?";
-            $stmt = $connection->prepare($queryComponents);
-            $stmt->bind_param("s", $record["id"]);
-            $stmt->execute();
-            $stmt->bind_result($id, $name, $score);
-
-            $results = array();
-
-            while ($stmt->fetch()) {
-                $row = array(
-                    "id" => $id,
-                    "component_name" => $name,
-                    "component_score" => $score
-                );
-
-                array_push($results, $row);
-            }
-
-            $stmt->close();
-
-            foreach ($results as $component) {
-                $placeholderComponents = [
-                    "id" => $component["id"],
-                    "component_name" => $component["component_name"],
-                    "component_score" => $component["component_score"],
-                ];
-
-                $queryActivities = "SELECT COUNT(*) as activities FROM " . TBL_ACTIVITIES . " WHERE component_id = ?";
-                $stmt = $connection->prepare($queryActivities);
-                $stmt->bind_param("s", $component["id"]);
-                $stmt->execute();
-
-                $stmt->bind_result($activities);
-                $stmt->fetch();
-
-                $placeholderComponents["activities"] = $activities;
-
-                array_push($placeholder["components"], $placeholderComponents);
-
-                $stmt->close();
-            }
-
-            array_push($data, $placeholder);
-        }
-
+        http_response_code(200);
+        echo createResponse(200, "GET Sections Successful", "", "", $result);
+        exit();
     }
 
-    http_response_code(200);
-    echo createResponse(200, "GET Records Successful", "", "", $data);
-    exit();
+    private function getSection($id)
+    {
+        global $connection;
+
+        $query = "SELECT uid as id, section_name as name, sy_start as syStart, sy_end as syEnd, color FROM " . TBL_SECTIONS . " WHERE teacher_uid = ? AND uid = ? LIMIT 1";
+        $stmt = $connection->prepare($query);
+        $stmt->bind_param("ss", $_SESSION["uid"], $id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $stmt->close();
+
+        $row = $result->fetch_assoc();
+
+        $data = [
+            "id" => $row["id"],
+            "name" => $row["name"],
+            "syStart" => $row["syStart"],
+            "syEnd" => $row["syEnd"],
+            "color" => $row["color"],
+        ];
+
+        return $data;
+    }
+
+    private function SectionCheck($data)
+    {
+        if (empty($data) || $data === null) {
+            http_response_code(400);
+            echo parent::createResponse(400, "Request Error", "A Request Data is Empty", "Section Data is Empty", "");
+            exit();
+        }
+
+        if (empty($data->id) || $data->id === null) {
+            http_response_code(400);
+            echo parent::createResponse(400, "Request Error", "A Request Data is Empty", "Section ID is Empty", "");
+            exit();
+        }
+
+        return true;
+    }
+
+    public function Transmutations()
+    {
+        global $connection;
+
+        $this->TokenCheck($this->request);
+
+        $query = "SELECT uid as id, name, lowest, passing, highest FROM " . TBL_TRANSMUTATIONS . " WHERE teacher_uid = ? ORDER BY is_default DESC, name DESC";
+        $stmt = $connection->prepare($query);
+        $stmt->bind_param("s", $_SESSION["uid"]);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $stmt->close();
+
+        $result = $result->fetch_all(MYSQLI_ASSOC);
+
+        http_response_code(200);
+        echo createResponse(200, "GET Transmutations Successful", "", "", $result);
+        exit();
+    }
+
+    private function getTransmutation($id)
+    {
+        global $connection;
+
+        $query = "SELECT uid as id, name, lowest, passing, highest FROM " . TBL_TRANSMUTATIONS . " WHERE teacher_uid = ? AND uid = ? LIMIT 1";
+        $stmt = $connection->prepare($query);
+        $stmt->bind_param("ss", $_SESSION["uid"], $id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $stmt->close();
+
+        $row = $result->fetch_assoc();
+
+        $data = [
+            "id" => $row["id"],
+            "name" => $row["name"],
+            "lowest" => $row["lowest"],
+            "passing" => $row["passing"],
+            "highest" => $row["highest"],
+        ];
+
+        return $data;
+    }
+
+    private function TransmutationCheck($data)
+    {
+
+        if (empty($data) || $data === null) {
+            http_response_code(400);
+            echo parent::createResponse(400, "Request Error", "A Request Data is Empty", "Transmutation Data is Empty", "");
+            exit();
+        }
+
+        if (empty($data->id) || $data->id === null) {
+            http_response_code(400);
+            echo parent::createResponse(400, "Request Error", "A Request Data is Empty", "Transmutation ID is Empty", "");
+            exit();
+        }
+
+        return true;
+    }
+
+    private function getComponents($id)
+    {
+        global $connection;
+
+        $query = "SELECT uid as id, component_name as name, score, order_no FROM " . TBL_RECORDS_COMPONENTS . " WHERE record_id = ? ORDER BY order_no";
+        $stmt = $connection->prepare($query);
+        $stmt->bind_param("s", $id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $stmt->close();
+
+        $result = $result->fetch_all(MYSQLI_ASSOC);
+
+        $data = [];
+        foreach ($result as $row) {
+            $data[] = [
+                "id" => $row["id"],
+                "name" => $row["name"],
+                "score" => $row["score"],
+                "order_no" => $row["order_no"],
+                "activities" => $this->getCountActivities($row["id"]),
+            ];
+        }
+
+        return $data;
+    }
+
+    private function getCountActivities($id)
+    {
+        global $connection;
+
+        $query = "SELECT COUNT(uid) as count FROM " . TBL_ACTIVITIES . " WHERE component_id = ?";
+        $stmt = $connection->prepare($query);
+        $stmt->bind_param("s", $id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $stmt->close();
+
+        $row = $result->fetch_assoc();
+
+        return $row["count"];
+    }
+
+    private function RequestCheck($request)
+    {
+        if ($this->TokenCheck($request) && $this->DataCheck($request)) {
+            $this->token = $request->token;
+            $this->data = $request->data;
+        } else {
+            http_response_code(400);
+            echo parent::createResponse(400, "Internal Server Error", "Internal Server Error", "", "");
+            exit();
+        }
+    }
+
+    private function DataCheck($request)
+    {
+        if (empty($request->data) || $request->data === null) {
+            http_response_code(400);
+            echo parent::createResponse(400, "Error", "Data is Empty", "Data is Empty", "");
+            exit();
+        }
+
+        $data = $request->data;
+
+
+
+        $this->data = $data;
+
+        return true;
+    }
+
+    private function TokenCheck($request)
+    {
+        if (empty($request->token) || $request->token === null) {
+            http_response_code(400);
+            echo parent::createResponse(400, "Request Error", "A Request Data is Empty", "Request Token is Empty", "");
+            exit();
+        }
+        if (hash("sha256", $_SESSION["uid"]) !== $request->token) {
+            http_response_code(403);
+            echo parent::createResponse(403, "Page Error", "Forbidden Access to Page", "Incorrect token", "");
+            session_destroy();
+            exit();
+        }
+
+        $this->token = $request->token;
+
+        return true;
+    }
 }
-
-
 
 // RECORDS
 
@@ -382,17 +430,14 @@ if (isset($_POST['addRecord'])) {
                 $component->score
             );
             $stmt->execute();
-
         }
 
         exit();
-
     }
 
     http_response_code(400);
     echo createResponse(400, "Add Error", "", "", "");
     exit();
-
 }
 
 if (isset($_POST['updateRecord'])) {
@@ -467,7 +512,6 @@ if (isset($_POST['updateRecord'])) {
                     $newComponentUID = generateUID(6) . "-" . generateUID(6);
                     $query = "SELECT * FROM " . TBL_RECORDS_COMPONENTS . " WHERE uid = '" . $newComponentUID . "'";
                     $result = $connection->query($query);
-
                 } while ($result->num_rows > 0);
 
                 $queryNewComponent = "INSERT INTO " . TBL_RECORDS_COMPONENTS . " (
@@ -491,12 +535,8 @@ if (isset($_POST['updateRecord'])) {
                 );
                 $stmt->execute();
                 $stmt->close();
-
             }
-
-
         }
-
     }
 
     $queryGetComponents = "SELECT component_name FROM " . TBL_RECORDS_COMPONENTS . " WHERE record_id = ?";
@@ -655,24 +695,24 @@ if (isset($_POST['deleteRecord'])) {
 }
 
 
-// COMPONENTS
-if (isset($_POST['deleteComponent'])) {
-
-    $postData = json_decode($_POST['deleteComponent']);
 
 
-
-    if (hash("sha256", $_SESSION["uid"]) !== $postData->token) {
-        http_response_code(404);
-        echo createResponse(404, "Redirect Error", "Incorrect token", "Incorrect token", "");
-        session_destroy();
-        exit();
-    }
+if (isset($_GET['sections'])) {
+    $placeholder = new ClassRecords(json_decode($_GET['sections']));
+    $placeholder->Sections();
 }
 
-if (isset($_POST['logout'])) {
-    session_destroy();
-    http_response_code(200);
-    echo createResponse(200, "Logout Successful", "", "", "");
-    exit();
+if (isset($_GET['transmutations'])) {
+    $placeholder = new ClassRecords(json_decode($_GET['transmutations']));
+    $placeholder->Transmutations();
+}
+
+if (isset($_GET['index'])) {
+    $placeholder = new ClassRecords(json_decode($_GET['index']));
+    $placeholder->Index();
+}
+
+if (isset($_GET['store'])) {
+    $placeholder = new ClassRecords(json_decode($_GET['store']));
+    $placeholder->Store();
 }

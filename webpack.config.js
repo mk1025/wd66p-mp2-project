@@ -6,10 +6,7 @@ module.exports = {
     login: ["./pages/login/script.ts"],
     register: ["./pages/registration/script.ts"],
     students: ["./pages/students/script.ts", "./pages/students/load.ts"],
-    classrecords: [
-      "./pages/classrecords/script.ts",
-      "./pages/classrecords/load.ts",
-    ],
+    classrecords: ["./pages/classrecords/script.ts"],
     viewrecord: ["./pages/viewrecord/script.ts"],
     transmutation: ["./pages/transmutations/script.ts"],
   },
