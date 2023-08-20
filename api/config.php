@@ -56,7 +56,7 @@ if ($result->num_rows === 0) {
         color VARCHAR(255) NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (teacher_uid) REFERENCES users(uid)
+        FOREIGN KEY (teacher_uid) REFERENCES users(uid) ON DELETE CASCADE
         
     ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci";
 
@@ -82,7 +82,7 @@ if ($result->num_rows === 0) {
         birthday DATE NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (section_id) REFERENCES sections(uid)
+        FOREIGN KEY (section_id) REFERENCES sections(uid) ON DELETE CASCADE
     ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci";
 
     if (!$connection->query($createTableSQL)) {
@@ -108,7 +108,7 @@ if ($result->num_rows === 0) {
         is_default BOOLEAN DEFAULT FALSE NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (teacher_uid) REFERENCES users(uid)
+        FOREIGN KEY (teacher_uid) REFERENCES users(uid) ON DELETE CASCADE
     ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci";
 
     if (!$connection->query($createTableSQL)) {
@@ -132,9 +132,9 @@ if ($result->num_rows === 0) {
         name VARCHAR(255) NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (section_id) REFERENCES sections(uid),
-        FOREIGN KEY (teacher_uid) REFERENCES users(uid),
-        FOREIGN KEY (transmutation_id) REFERENCES transmutations(uid)
+        FOREIGN KEY (section_id) REFERENCES sections(uid) ON DELETE CASCADE,
+        FOREIGN KEY (teacher_uid) REFERENCES users(uid) ON DELETE CASCADE,
+        FOREIGN KEY (transmutation_id) REFERENCES transmutations(uid) ON DELETE CASCADE
     ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci";
 
     if (!$connection->query($createTableSQL)) {
@@ -158,7 +158,7 @@ if ($result->num_rows === 0) {
         score INT(11) NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (record_id) REFERENCES classrecords(uid)
+        FOREIGN KEY (record_id) REFERENCES classrecords(uid) ON DELETE CASCADE
     ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci";
 
     if (!$connection->query($createTableSQL)) {
@@ -182,7 +182,7 @@ if ($result->num_rows === 0) {
         color VARCHAR(255) NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (component_id) REFERENCES components(uid)
+        FOREIGN KEY (component_id) REFERENCES classrecords_components(uid) ON DELETE CASCADE
     ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci";
 
     if (!$connection->query($createTableSQL)) {
@@ -207,7 +207,7 @@ if ($result->num_rows === 0) {
         bonus BOOLEAN DEFAULT FALSE NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (activity_id) REFERENCES activities(uid)
+        FOREIGN KEY (activity_id) REFERENCES activities(uid) ON DELETE CASCADE
     ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci";
 
     if (!$connection->query($createTableSQL)) {
@@ -230,9 +230,9 @@ if ($result->num_rows === 0) {
         score INT(11) DEFAULT 0 NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (student_id) REFERENCES students(uid),
-        FOREIGN KEY (activity_id) REFERENCES activities(uid),
-        FOREIGN KEY (component_id) REFERENCES activities_components(uid)
+        FOREIGN KEY (student_id) REFERENCES students(uid) ON DELETE CASCADE,
+        FOREIGN KEY (activity_id) REFERENCES activities(uid) ON DELETE CASCADE,
+        FOREIGN KEY (component_id) REFERENCES activities_components(uid) ON DELETE CASCADE
     ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_general_ci";
 
     if (!$connection->query($createTableSQL)) {
