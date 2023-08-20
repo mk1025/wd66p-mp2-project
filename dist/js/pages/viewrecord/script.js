@@ -638,10 +638,12 @@ function populateComponentList(record) {
         ${studentTotalScore} / ${getActivityTotalScore}
         </td>
         <td class='px-6 py-3 text-center border-x border-x-neutral-400 font-semibold'>
-        ${(studentTotalScore / getActivityTotalScore) * 100 || 0} %
+        ${studentTotalScore > 0
+                ? ((studentTotalScore / getActivityTotalScore) * 100).toFixed(2)
+                : 0} %
         </td>
         <td class='px-6 py-3 text-center border-x border-x-neutral-400 font-semibold'>
-        ${LinearScale(0, 100, 0, parseInt(component.score) || 0, (studentTotalScore / getActivityTotalScore) * 100 || 0) || 0} %
+        ${LinearScale(0, 100, 0, parseInt(component.score) || 0, (studentTotalScore / getActivityTotalScore) * 100 || 0).toFixed(2) || 0} %
         </td>
       `);
             TableBody.appendChild(TableBodyRow);

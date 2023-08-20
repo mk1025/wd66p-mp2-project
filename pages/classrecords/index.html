@@ -100,7 +100,7 @@
 						<div class="p-6 space-y-6">
 							<!-- Modal Content -->
 							<div class="mb-6">
-								<label for="RecordModalName">Class Record Name: </label>
+								<label for="RecordModalNameInput">Class Record Name: </label>
 								<input
 									type="text"
 									name="RecordModalNameInput"
@@ -216,8 +216,6 @@
 							<button
 								id="RecordModalAddComponentButton"
 								data-modal-target="ComponentModal"
-								data-modal-toggle="ComponentModal"
-								data-modal-hide="RecordModal"
 								class="p-1 text-white bg-green-400 hover:bg-green-600 rounded shadow w-full"
 							>
 								<i class="fa-solid fa-plus mr-2"></i>New Component
@@ -303,8 +301,7 @@
 								id="ComponentModalCloseButton"
 								type="button"
 								class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center"
-								data-modal-hide="ComponentModal"
-								data-modal-show="RecordModal"
+								data-modal-target="RecordModal"
 							>
 								<i class="fa-regular fa-circle-xmark text-xl"></i>
 								<span class="sr-only">Close modal</span>
@@ -314,7 +311,7 @@
 						<div class="p-6 space-y-6">
 							<!-- Modal Content -->
 							<div class="w-full mb-2">
-								<label for="ComponentName">Component Name:</label>
+								<label for="ComponentNameInput">Component Name:</label>
 								<input
 									type="text"
 									name="ComponentNameInput"
@@ -323,7 +320,7 @@
 								/>
 							</div>
 							<div class="w-full mb-2">
-								<label for="ComponentScore">Weighted Score:</label>
+								<label for="ComponentScoreInput">Weighted Score:</label>
 								<input
 									type="number"
 									step="1"
@@ -343,8 +340,7 @@
 						>
 							<button
 								id="ComponentModalButton"
-								data-modal-hide="ComponentModal"
-								data-modal-show="RecordModal"
+								data-modal-target="RecordModal"
 								type="button"
 								class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
 							>
@@ -352,8 +348,7 @@
 							</button>
 							<button
 								id="ComponentModalCancelButton"
-								data-modal-hide="ComponentModal"
-								data-modal-show="RecordModal"
+								data-modal-target="RecordModal"
 								type="button"
 								class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10"
 							>
@@ -394,7 +389,7 @@
 				</div>
 			</div>
 			<!-- Create Component Modal (END) -->
-			<!-- Delete Component Modal -->
+			<!-- Delete Modal -->
 			<div
 				id="DeleteModal"
 				tabindex="-1"
@@ -450,6 +445,7 @@
 							<button
 								id="DeleteModalButton"
 								data-modal-hide="DeleteModal"
+								data-modal-target="DeleteModal"
 								type="button"
 								class="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center mr-2"
 							>
@@ -458,6 +454,7 @@
 							<button
 								id="DeleteModalCancelButton"
 								data-modal-hide="DeleteModal"
+								data-modal-target="DeleteModal"
 								type="button"
 								class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10"
 							>
@@ -542,23 +539,6 @@
 		<main class="flex flex-row max-h-screen">
 			<!-- NAVIGATION PANEL -->
 			<nav class="flex flex-col items-center gap-5 w-max bg-slate-500 h-screen">
-				<button
-					class="px-2 py-1 text-white hover:bg-white rounded hover:text-slate-500 mt-2"
-				>
-					<span
-						id="SideMenuIcon_LeftAngle"
-						class="visible"
-					>
-						<i class="fa-solid fa-angle-left"></i>
-					</span>
-					<i class="fa-solid fa-bars"></i>
-					<span
-						id="SideMenuIcon_RightAngle"
-						class="invisible"
-					>
-						<i class="fa-solid fa-angle-right"></i>
-					</span>
-				</button>
 				<div class="flex flex-col items-center p-5">
 					<img
 						id="Profile_Photo"
@@ -568,12 +548,12 @@
 					/>
 					<span
 						id="Profile_FirstName"
-						class="font-medium text-white"
+						class="font-medium text-white text-center"
 						>First Name</span
 					>
 					<span
 						id="Profile_LastName"
-						class="font-medium text-white"
+						class="font-medium text-white text-center"
 						>Last Name</span
 					>
 				</div>

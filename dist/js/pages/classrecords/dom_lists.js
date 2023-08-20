@@ -40,6 +40,7 @@ export const SECTION_LIST = {
         SECTION_DROPDOWN_INIT.appendChild(UL);
         SECTION_LIST_INIT =
             SECTION_DROPDOWN_INIT.querySelectorAll('input[type="radio"][name="SectionListRadio"]');
+        this.Element = SECTION_LIST_INIT;
         if (sections.length > 0 && sections[0].name) {
             this.SetValue(sections[0]);
         }
@@ -140,6 +141,7 @@ export const TRANSMUTATION_LIST = {
         TRANSMUTATION_DROPDOWN_INIT.appendChild(UL);
         TRANSMUTATION_LIST_INIT =
             TRANSMUTATION_DROPDOWN_INIT.querySelectorAll('input[type="radio"][name="TransmutationListRadio"]');
+        this.Element = TRANSMUTATION_LIST_INIT;
         if (transmutations.length > 0 && transmutations[0].name) {
             this.SetValue(transmutations[0]);
         }
@@ -324,6 +326,9 @@ export const RECORDS_LIST = {
             Card.appendChild(Header);
             Card.appendChild(Content);
             RECORDS_CONTAINER.appendChild(Card);
+        }
+        if (records.length == 0) {
+            this.Element.innerHTML = "You have not created any Class Records yet...";
         }
     },
 };

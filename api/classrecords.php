@@ -59,6 +59,251 @@ class ClassRecords extends Functions
     public function Store()
     {
         global $connection;
+
+        $this->RequestCheck($this->request);
+
+        $this->RecordCheck($this->data);
+
+        $data = $this->data;
+        $section = $this->data->section;
+        $transmutation = $this->data->transmutation;
+        $components = $this->data->components;
+
+        $newUID = "";
+
+        do {
+            $newUID = generateUID(6) . "-" . generateUID(6);
+            $query = "SELECT * FROM " . TBL_RECORDS . " WHERE uid = '" . $newUID . "' LIMIT 1";
+            $stmt = $connection->prepare($query);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $stmt->close();
+        } while ($result->num_rows > 0);
+
+        $query = "INSERT INTO " . TBL_RECORDS . " (
+            teacher_uid,
+            section_id,
+            transmutation_id,
+            uid,
+            name,
+            created_at,
+            updated_at
+        ) VALUES (?, ?, ?, ?, ?, NOW(),NOW());";
+        $stmt = $connection->prepare($query);
+        $stmt->bind_param("sssss", $_SESSION["uid"], $section->id, $transmutation->id, $newUID, $data->name);
+        $stmt->execute();
+        $stmt->close();
+
+        foreach ($components as $component) {
+            $newComponentUID = "";
+            do {
+                $newComponentUID = generateUID(6) . "-" . generateUID(6);
+                $query = "SELECT * FROM " . TBL_RECORDS_COMPONENTS . " WHERE uid = '" . $newComponentUID . "' LIMIT 1";
+                $stmt = $connection->prepare($query);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                $stmt->close();
+            } while ($result->num_rows > 0);
+
+            $query = "INSERT INTO " . TBL_RECORDS_COMPONENTS . " (
+                record_id,
+                uid,
+                order_no,
+                component_name,
+                score,
+                created_at,
+                updated_at
+            ) VALUES (?, ?, ?, ?, ?, NOW(),NOW());";
+            $stmt = $connection->prepare($query);
+            $stmt->bind_param("ssssd", $newUID, $newComponentUID, $component->order_no, $component->name, $component->score);
+            $stmt->execute();
+            $stmt->close();
+        }
+
+        http_response_code(201);
+        echo createResponse(201, "POST Record Successful", "", "", "");
+        exit();
+
+    }
+
+    public function Update()
+    {
+        global $connection;
+
+        $this->RequestCheck($this->request);
+
+        $this->RecordCheck($this->data);
+
+        $data = $this->data;
+
+        $this->ComponentsCheck($data->components);
+
+        // Update Record
+        $query = "UPDATE " . TBL_RECORDS . " SET
+            teacher_uid = ?,
+            section_id = ?,
+            transmutation_id = ?,
+            name = ?,
+            updated_at = NOW()
+        WHERE uid = ?";
+        $stmt = $connection->prepare($query);
+        $stmt->bind_param("sssss", $_SESSION["uid"], $data->section->id, $data->transmutation->id, $data->name, $data->id);
+        $stmt->execute();
+        $stmt->close();
+
+        // Update Record Components
+        foreach ($data->components as $component) {
+
+            // Check if Component ID exist
+            $query = "SELECT * FROM " . TBL_RECORDS_COMPONENTS . " WHERE uid = ? AND record_id = ?";
+            $stmt = $connection->prepare($query);
+            $stmt->bind_param("ss", $component->id, $data->id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $stmt->close();
+
+            if ($result->num_rows === 0) {
+
+                // Check Component by Name
+                $query = "SELECT * FROM " . TBL_RECORDS_COMPONENTS . " WHERE record_id = ? AND component_name = ?";
+                $stmt = $connection->prepare($query);
+                $stmt->bind_param("ss", $data->id, $component->name);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                $stmt->close();
+
+                if ($result->num_rows === 0) {
+
+                    $newComponentUID = "";
+
+                    do {
+                        $newComponentUID = generateUID(6) . "-" . generateUID(6);
+                        $query = "SELECT * FROM " . TBL_RECORDS_COMPONENTS . " WHERE uid = ? LIMIT 1";
+                        $stmt = $connection->prepare($query);
+                        $stmt->bind_param("s", $newComponentUID);
+                        $stmt->execute();
+                        $stmt->close();
+                    } while ($result->num_rows > 0);
+
+                    // Insert Component
+                    $query = "INSERT INTO " . TBL_RECORDS_COMPONENTS . " (
+                        record_id,
+                        uid,
+                        order_no,
+                        component_name,
+                        score,
+                        created_at,
+                        updated_at
+                    ) VALUES (?, ?, ?, ?, ?, NOW(),NOW());";
+                    $stmt = $connection->prepare($query);
+                    $stmt->bind_param("sssss", $data->id, $newComponentUID, $component->order_no, $component->name, $component->score);
+                    $stmt->execute();
+                    $stmt->close();
+
+
+                } else {
+
+                    // Update Component based on Name
+                    $query = "UPDATE " . TBL_RECORDS_COMPONENTS . " SET
+                        order_no = ?,
+                        score = ?,
+                        component_name = ?,
+                        updated_at = NOW()
+                    WHERE component_name = ? AND record_id = ?";
+                    $stmt = $connection->prepare($query);
+                    $stmt->bind_param("sssss", $component->order_no, $component->score, $component->name, $component->name, $data->id);
+                    $stmt->execute();
+                    $stmt->close();
+
+                }
+
+            } else {
+
+                // Update Component based on ID
+                $query = "UPDATE " . TBL_RECORDS_COMPONENTS . " SET
+                    order_no = ?,
+                    score = ?,
+                    component_name = ?,
+                    updated_at = NOW()
+                WHERE uid = ? AND record_id = ?";
+                $stmt = $connection->prepare($query);
+                $stmt->bind_param("sssss", $component->order_no, $component->score, $component->name, $component->id, $data->id);
+                $stmt->execute();
+                $stmt->close();
+            }
+
+        }
+
+
+        http_response_code(200);
+        echo createResponse(200, "Update Record Successful", "", "", "");
+        exit();
+
+    }
+
+    public function Destroy()
+    {
+        global $connection;
+
+        $this->RequestCheck($this->request);
+
+        if (empty($this->data->id) || $this->data->id === null) {
+            http_response_code(400);
+            echo parent::createResponse(400, "Request Error", "A Request Data is Empty", "Class Record ID is Empty", "");
+            exit();
+        }
+
+        $record = $this->data;
+
+        // Check Record ID if it exists
+        $query = "SELECT * FROM " . TBL_RECORDS . " WHERE uid = ? AND teacher_uid = ?";
+        $stmt = $connection->prepare($query);
+        $stmt->bind_param("ss", $record->id, $_SESSION["uid"]);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $stmt->close();
+
+        if ($result->num_rows === 0) {
+            http_response_code(400);
+            echo parent::createResponse(400, "Request Error", "Class Record does not exist", "Record ID does not exist", "");
+            exit();
+        }
+
+        /*
+            DELETE IN STUDENT ACTIVITIES TABLE
+                THAT REFERENCES FROM ACTIVITIES TABLE
+                    THAT REFERENCES RECORDS COMPONENTS TABLE
+                        THAT REFERENCES RECORDS TABLE
+        */
+
+
+        // DELETE THE RECORD
+        $query = "DELETE FROM " . TBL_RECORDS . " WHERE uid = ? AND teacher_uid = ?";
+        $stmt = $connection->prepare($query);
+        $stmt->bind_param("ss", $record->id, $_SESSION["uid"]);
+        $stmt->execute();
+        $stmt->close();
+
+        http_response_code(200);
+        echo createResponse(200, "DELETE Record Successful", "", "", "");
+        exit();
+    }
+
+    private function RecordCheck($data)
+    {
+
+        if (empty($data->name) || $data->name === null) {
+            http_response_code(400);
+            echo parent::createResponse(400, "Request Error", "Class Record Name is Empty", "Class Record Name is Empty", "");
+            exit();
+        }
+
+        $this->SectionCheck($data->section);
+        $this->TransmutationCheck($data->transmutation);
+        $this->ComponentsCheck($data->components);
+
+        return true;
+
     }
 
     public function Sections()
@@ -109,13 +354,13 @@ class ClassRecords extends Functions
     {
         if (empty($data) || $data === null) {
             http_response_code(400);
-            echo parent::createResponse(400, "Request Error", "A Request Data is Empty", "Section Data is Empty", "");
+            echo parent::createResponse(400, "Request Error", "No Section Provided", "Section Data is Empty", "");
             exit();
         }
 
         if (empty($data->id) || $data->id === null) {
             http_response_code(400);
-            echo parent::createResponse(400, "Request Error", "A Request Data is Empty", "Section ID is Empty", "");
+            echo parent::createResponse(400, "Request Error", "No Section Provided", "Section ID is Empty", "");
             exit();
         }
 
@@ -174,11 +419,88 @@ class ClassRecords extends Functions
             echo parent::createResponse(400, "Request Error", "A Request Data is Empty", "Transmutation Data is Empty", "");
             exit();
         }
-
         if (empty($data->id) || $data->id === null) {
             http_response_code(400);
             echo parent::createResponse(400, "Request Error", "A Request Data is Empty", "Transmutation ID is Empty", "");
             exit();
+        }
+        if (empty($data->name) || $data->name === null) {
+            http_response_code(400);
+            echo parent::createResponse(400, "Error", "Transmutation Name is Empty", "Transmutation Name is Empty", "");
+            exit();
+        }
+        if (!is_numeric($data->lowest)) {
+            http_response_code(400);
+            echo parent::createResponse(400, "Error", "Transmutation Lowest is not a number", "Transmutation Lowest is Empty", "");
+            exit();
+        }
+        if (!is_numeric($data->passing)) {
+            http_response_code(400);
+            echo parent::createResponse(400, "Error", "Transmutation Passing is not a number", "Transmutation Passing is Empty", "");
+            exit();
+        }
+        if (!is_numeric($data->highest)) {
+            http_response_code(400);
+            echo parent::createResponse(400, "Error", "Transmutation Highest is not a number", "Transmutation Highest is Empty", "");
+            exit();
+        }
+        if ($data->lowest >= $data->passing || $data->lowest >= $data->highest) {
+            http_response_code(400);
+            echo parent::createResponse(400, "Error", "Transmutation Lowest cannot be greater than or equal to the Passing or the Highest", "", "");
+            exit();
+        }
+        if ($data->passing >= $data->highest) {
+            http_response_code(400);
+            echo parent::createResponse(400, "Error", "Transmutation Passing cannot be greater than or equal to the Highest", "", "");
+            exit();
+        }
+
+        return true;
+    }
+
+    private function ComponentsCheck($data)
+    {
+
+        if (empty($data) || $data === null) {
+            http_response_code(400);
+            echo parent::createResponse(400, "Request Error", "There are no components", "Component Data is Empty", "");
+            exit();
+        }
+
+        $components = $data;
+
+        foreach ($components as $component) {
+            if (empty($component->id) || $component->id === null) {
+                http_response_code(400);
+                echo parent::createResponse(400, "Request Error", "A Request Data is Empty", "Component ID is Empty", "");
+                exit();
+            }
+            if (empty($component->name) || $component->name === null) {
+                http_response_code(400);
+                echo parent::createResponse(400, "Request Error", "Component Name is Empty", "Component Name is Empty", "");
+                exit();
+            }
+            if (!is_numeric($component->score)) {
+                http_response_code(400);
+                echo parent::createResponse(400, "Request Error", "Component Score is not a number", "Component Score is Invalid", "");
+                exit();
+            }
+            if ($component->score <= 0) {
+                http_response_code(400);
+                echo parent::createResponse(400, "Request Error", "Component Score cannot be less than or equal to 0", "Component Score is Invalid", "");
+                exit();
+            }
+            if (!is_numeric($component->order_no)) {
+                http_response_code(400);
+                echo parent::createResponse(400, "Request Error", "Component Order No is not a number", "Component Order No is Invalid", "");
+                exit();
+            }
+            if ($component->order_no <= 0) {
+                http_response_code(400);
+                echo parent::createResponse(400, "Request Error", "Component Order No cannot be less than or equal to 0", "Component Order No is Invalid", "");
+                exit();
+            }
+
         }
 
         return true;
@@ -237,6 +559,7 @@ class ClassRecords extends Functions
             echo parent::createResponse(400, "Internal Server Error", "Internal Server Error", "", "");
             exit();
         }
+        return true;
     }
 
     private function DataCheck($request)
@@ -277,168 +600,6 @@ class ClassRecords extends Functions
 }
 
 // RECORDS
-
-if (isset($_POST['addRecord'])) {
-    /*
-        Data Schema
-        {
-            "addRecord": {
-                name: string,
-                section: string,
-                components: array [
-                    {
-                        order: number,
-                        name: string,
-                        score: number
-                    }
-                ]
-            }
-        }
-    */
-    $postData = json_decode($_POST['addRecord']);
-
-    if (hash("sha256", $_SESSION["uid"]) !== $postData->token) {
-        http_response_code(403);
-        echo createResponse(403, "Page Error", "Forbidden Access to Page", "", "");
-        session_destroy();
-        exit();
-    }
-
-    if ($postData->name === "") {
-        http_response_code(400);
-        echo createResponse(400, "Create Record Error", "Class Record Name cannot be empty", "Name cannot be empty", "");
-        exit();
-    }
-    if ($postData->section === "") {
-        http_response_code(400);
-        echo createResponse(400, "Create Record Error", "Class Record Section cannot be empty", "Section cannot be empty", "");
-        exit();
-    }
-    if (!is_array($postData->components) || count($postData->components) === 0) {
-        http_response_code(400);
-        echo createResponse(400, "Create Record Error", "There must be atleast 1 component in the Class Record", "There must be atleast 1 component", "");
-        exit();
-    }
-    foreach ($postData->components as $component) {
-        if ($component->order === "") {
-            http_response_code(400);
-            echo createResponse(400, "Create Record Error", "Component order cannot be empty", "Component order cannot be empty", "");
-            exit();
-        }
-        if (!is_numeric($component->order)) {
-            http_response_code(400);
-            echo createResponse(400, "Create Record Error", "Component order must be a number", "Component order must be a number", "");
-            exit();
-        }
-        if ($component->order <= 0) {
-            http_response_code(400);
-            echo createResponse(400, "Create Record Error", "Component order must not be less than or equal to 0", "Component order cannot be negative", "");
-            exit();
-        }
-        if ($component->name === "") {
-            http_response_code(400);
-            echo createResponse(400, "Create Record Error", "Component name cannot be empty", "Component name cannot be empty", "");
-            exit();
-        }
-        if ($component->score === "") {
-            http_response_code(400);
-            echo createResponse(400, "Create Record Error", "Component score cannot be empty", "Component score cannot be empty", "");
-            exit();
-        }
-        if (!is_numeric($component->score)) {
-            http_response_code(400);
-            echo createResponse(400, "Create Record Error", "Component score must be a number", "Component score must be a number", "");
-            exit();
-        }
-        if ($component->score <= 0) {
-            http_response_code(400);
-            echo createResponse(400, "Create Record Error", "Component score must not be less than or equal to 0%", "Component score cannot be negative", "");
-            exit();
-        }
-    }
-
-
-    $newRecordUID = "";
-    $default = "Default";
-
-
-
-
-    do {
-        $newRecordUID = generateUID(6) . "-" . generateUID(6);
-        $query = "SELECT * FROM " . TBL_RECORDS . " WHERE uid = '" . $newRecordUID . "' LIMIT 1";
-        $result = $connection->query($query);
-    } while ($result->num_rows > 0);
-
-    $queryTransmutation = "SELECT uid FROM " . TBL_TRANSMUTATIONS . " WHERE name = ? LIMIT 1";
-    $stmt = $connection->prepare($queryTransmutation);
-    $stmt->bind_param("s", $default);
-    $stmt->execute();
-    $stmt->bind_result($defaultTransmutationID);
-
-    $stmt->fetch();
-    $stmt->close();
-
-
-    $query = "INSERT INTO " . TBL_RECORDS . " (
-        teacher_uid,
-        section_id,
-        transmutation_id,
-        uid,
-        name,
-        created_at,
-        updated_at
-        )
-        VALUES (?, ?, ?, ?, ?, NOW(), NOW())";
-    $stmt = $connection->prepare($query);
-    $stmt->bind_param("sssss", $_SESSION["uid"], $postData->section, $defaultTransmutationID, $newRecordUID, $postData->name);
-    $stmt->execute();
-
-    if ($stmt->affected_rows > 0) {
-        $stmt->close();
-
-        http_response_code(200);
-        echo createResponse(200, "Add Successful", "Record created", "", "");
-
-        $components = $postData->components;
-
-        foreach ($components as $component) {
-
-            do {
-                $newComponentUID = generateUID(6) . "-" . generateUID(6);
-                $query = "SELECT * FROM " . TBL_RECORDS_COMPONENTS . " WHERE uid = '" . $newComponentUID . "'";
-                $result = $connection->query($query);
-            } while ($result->num_rows > 0);
-
-            $query = "INSERT INTO " . TBL_RECORDS_COMPONENTS . " (
-                record_id,
-                uid,
-                order_no,
-                component_name,
-                score,
-                created_at,
-                updated_at
-                )
-                VALUES (?, ?, ?, ?, ?, NOW(), NOW())";
-            $stmt = $connection->prepare($query);
-            $stmt->bind_param(
-                "sssss",
-                $newRecordUID,
-                $newComponentUID,
-                $component->order,
-                $component->name,
-                $component->score
-            );
-            $stmt->execute();
-        }
-
-        exit();
-    }
-
-    http_response_code(400);
-    echo createResponse(400, "Add Error", "", "", "");
-    exit();
-}
 
 if (isset($_POST['updateRecord'])) {
     /*
@@ -610,89 +771,6 @@ if (isset($_POST['updateRecord'])) {
     exit();
 }
 
-if (isset($_POST['deleteRecord'])) {
-    /*
-        Data Schema
-        {
-            "deleteRecord": {
-                token: string,
-                id: string
-            }
-        }
-    */
-    $postData = json_decode($_POST['deleteRecord']);
-
-    if (hash("sha256", $_SESSION["uid"]) !== $postData->token) {
-        http_response_code(403);
-        echo createResponse(403, "Page Error", "Forbidden Access to Page", "Incorrect Token", "");
-        session_destroy();
-        exit();
-    }
-
-    if ($postData->id === "") {
-        http_response_code(400);
-        echo createResponse(400, "Delete Record Error", "Record ID cannot be empty", "Record ID cannot be empty", "");
-        exit();
-    }
-
-    $queryCheck = "SELECT * FROM " . TBL_RECORDS . " WHERE uid = ?";
-    $stmt = $connection->prepare($queryCheck);
-    $stmt->bind_param("s", $postData->id);
-    $stmt->execute();
-    $stmt->store_result();
-    $stmt->fetch();
-
-
-    if ($stmt->num_rows === 0) {
-        $stmt->close();
-        http_response_code(404);
-        echo createResponse(404, "Delete Class Record Error", "Record not found", "Record not found", "");
-        exit();
-    }
-
-    $query = "DELETE FROM " . TBL_STUDENTS_ACTIVITIES . " WHERE component_id IN
-        (SELECT uid FROM " . TBL_ACTIVITIES_COMPONENTS . " WHERE activity_id IN
-            (SELECT uid FROM " . TBL_ACTIVITIES . " WHERE component_id IN 
-                (SELECT uid FROM " . TBL_RECORDS_COMPONENTS . " WHERE record_id = ?))
-        );
-    ";
-    $stmt = $connection->prepare($query);
-    $stmt->bind_param("s", $postData->id);
-    $stmt->execute();
-    $stmt->close();
-
-    $query = "DELETE FROM " . TBL_ACTIVITIES_COMPONENTS . " WHERE activity_id IN
-        (SELECT uid FROM " . TBL_ACTIVITIES . " WHERE component_id IN
-            (SELECT uid FROM " . TBL_RECORDS_COMPONENTS . " WHERE record_id = ?))
-        ";
-    $stmt = $connection->prepare($query);
-    $stmt->bind_param("s", $postData->id);
-    $stmt->execute();
-    $stmt->close();
-
-    $queryActivities = "DELETE FROM " . TBL_ACTIVITIES . " WHERE component_id IN
-        (SELECT uid FROM " . TBL_RECORDS_COMPONENTS . " WHERE record_id = ?)";
-    $stmt = $connection->prepare($queryActivities);
-    $stmt->bind_param("s", $postData->id);
-    $stmt->execute();
-    $stmt->close();
-
-    $queryComponents = "DELETE FROM " . TBL_RECORDS_COMPONENTS . " WHERE record_id = ?";
-    $stmt = $connection->prepare($queryComponents);
-    $stmt->bind_param("s", $postData->id);
-    $stmt->execute();
-    $stmt->close();
-
-    $queryRecord = "DELETE FROM " . TBL_RECORDS . " WHERE uid = ?";
-    $stmt = $connection->prepare($queryRecord);
-    $stmt->bind_param("s", $postData->id);
-    $stmt->execute();
-    $stmt->close();
-
-    http_response_code(200);
-    echo createResponse(200, "Delete Successful", "", "", "");
-    exit();
-}
 
 
 
@@ -712,7 +790,17 @@ if (isset($_GET['index'])) {
     $placeholder->Index();
 }
 
-if (isset($_GET['store'])) {
-    $placeholder = new ClassRecords(json_decode($_GET['store']));
+if (isset($_POST['store'])) {
+    $placeholder = new ClassRecords(json_decode($_POST['store']));
     $placeholder->Store();
+}
+
+if (isset($_POST['destroy'])) {
+    $placeholder = new ClassRecords(json_decode($_POST['destroy']));
+    $placeholder->Destroy();
+}
+
+if (isset($_POST['update'])) {
+    $placeholder = new ClassRecords(json_decode($_POST['update']));
+    $placeholder->Update();
 }
