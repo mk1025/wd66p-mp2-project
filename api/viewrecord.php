@@ -1107,9 +1107,9 @@ if (isset($_POST['deleteActivity'])) {
     $stmt->close();
 
     // Delete Activity based on Component ID
-    $query = "DELETE FROM " . TBL_ACTIVITIES . " WHERE component_id = ?";
+    $query = "DELETE FROM " . TBL_ACTIVITIES . " WHERE uid = ? AND component_id = ?";
     $stmt = $connection->prepare($query);
-    $stmt->bind_param("s", $postData->component_id);
+    $stmt->bind_param("ss", $postData->activity_id, $postData->component_id);
     $stmt->execute();
     $stmt->close();
 
