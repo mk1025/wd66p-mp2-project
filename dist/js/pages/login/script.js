@@ -30,6 +30,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 LOGIN_BUTTON.addEventListener("click", login);
+document.getElementById("Homepage_Button").onclick = homepage;
 function login() {
     if (!CREDENTIAL_INPUT.value.length || !PASSWORD_INPUT.value.length) {
         return alertMessage(true, "Please enter the missing fields.");
@@ -84,4 +85,7 @@ function handleResponseData(data) {
     else {
         alertMessage(true, data.message);
     }
+}
+function homepage() {
+    window.location.href = Routes.HOME_PAGE;
 }

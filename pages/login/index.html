@@ -1,95 +1,116 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<head>
+		<meta charset="UTF-8" />
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1.0"
+		/>
 
-    <title>Sign In</title>
+		<title>Sign In</title>
 
-    <link
-      rel="shortcut icon"
-      href="../../assets/favicon/favicon.ico"
-      type="image/x-icon"
-    />
-    <link rel="stylesheet" href="../../styles/styles.css" />
-    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+		<link
+			rel="shortcut icon"
+			href="../../assets/favicon/favicon.ico"
+			type="image/x-icon"
+		/>
+		<link
+			rel="stylesheet"
+			href="../../styles/styles.css"
+		/>
+		<link
+			rel="stylesheet"
+			href="https://unpkg.com/aos@next/dist/aos.css"
+		/>
 
-    <script
-      src="https://kit.fontawesome.com/7369d6167e.js"
-      crossorigin="anonymous"
-    ></script>
-    <script src="../../node_modules/jquery/dist/jquery.min.js"></script>
+		<script
+			src="https://kit.fontawesome.com/7369d6167e.js"
+			crossorigin="anonymous"
+		></script>
+		<script src="../../node_modules/jquery/dist/jquery.min.js"></script>
 
-    <script src="../../dist/login.bundle.js" defer></script>
-  </head>
-  <body class="w-full min-h-screen bg-slate-600 md:py-10 flex items-center">
-    <main
-      class="container h-full md:h-max md:w-1/4 rounded-md bg-slate-50 p-5 shadow-xl scrollbar-thin md:m-auto overflow-y-auto"
-    >
-      <div class="mb-10 flex justify-between">
-        <h1 class="font-bold text-2xl text-center text-neutral-500">Sign In</h1>
-        <button
-          id="Homepage_Button"
-          class="rounded-full bg-red-400 text-white px-5 py-2 shadow-md hover:bg-red-500"
-        >
-          <i class="fa-solid fa-house"></i>
-        </button>
-      </div>
-      <div
-        id="alert"
-        class="hidden flex flex-row gap-3 p-2 items-center bg-red-200 w-full rounded shadow"
-      >
-        <i class="fa-solid fa-circle-exclamation text-red-400"></i>
-        <span id="alert_text" class="text-sm text-red-600 font-medium"
-          >Invalid Email/Username or Password</span
-        >
-      </div>
-      <div class="mt-10 mb-6">
-        <label
-          for="email_username"
-          class="mb-2 block text-sm font-medium text-gray-900"
-          >Email or Username</label
-        >
-        <input
-          type="text"
-          name="email_username"
-          id="email_username"
-          class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500"
-        />
-      </div>
-      <div class="mb-6">
-        <label
-          for="password"
-          class="mb-2 block text-sm font-medium text-gray-900"
-          >Password</label
-        >
-        <input
-          type="password"
-          name="password"
-          id="password"
-          class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500"
-        />
-      </div>
-      <div class="my-6">
-        <a href="" class="text-sm text-blue-500 hover:underline"
-          >Forgot Password?</a
-        >
-      </div>
-      <div class="flex flex-row gap-5">
-        <button
-          type="button"
-          name="login_button"
-          id="login_button"
-          class="h-max w-max rounded-lg bg-blue-700 px-5 py-2 text-center text-sm font-medium shadow text-white hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 disabled:bg-neutral-500"
-        >
-          Sign In
-        </button>
-        <div id="spinner" class="hidden flex align-middle items-center">
-          <i
-            class="fa-solid fa-circle-notch fa-spin text-blue-600 text-2xl"
-          ></i>
-        </div>
-      </div>
-    </main>
-  </body>
+		<script
+			src="../../dist/login.bundle.js"
+			defer
+		></script>
+	</head>
+	<body class="w-full min-h-screen bg-slate-600 md:py-10 flex items-center">
+		<main
+			class="container h-full md:h-max md:w-1/4 rounded-md bg-slate-50 p-5 shadow-xl scrollbar-thin md:m-auto overflow-y-auto"
+		>
+			<div class="mb-10 flex justify-between">
+				<h1 class="font-bold text-2xl text-center text-neutral-500">Sign In</h1>
+				<a href="../../">
+					<button
+						id="Homepage_Button"
+						class="rounded-full bg-red-400 text-white px-5 py-2 shadow-md hover:bg-red-500"
+					>
+						<i class="fa-solid fa-house"></i>
+					</button>
+				</a>
+			</div>
+			<div
+				id="alert"
+				class="hidden flex flex-row gap-3 p-2 items-center bg-red-200 w-full rounded shadow"
+			>
+				<i class="fa-solid fa-circle-exclamation text-red-400"></i>
+				<span
+					id="alert_text"
+					class="text-sm text-red-600 font-medium"
+					>Invalid Email/Username or Password</span
+				>
+			</div>
+			<div class="mt-10 mb-6">
+				<label
+					for="email_username"
+					class="mb-2 block text-sm font-medium text-gray-900"
+					>Email or Username</label
+				>
+				<input
+					type="text"
+					name="email_username"
+					id="email_username"
+					class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500"
+				/>
+			</div>
+			<div class="mb-6">
+				<label
+					for="password"
+					class="mb-2 block text-sm font-medium text-gray-900"
+					>Password</label
+				>
+				<input
+					type="password"
+					name="password"
+					id="password"
+					class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500"
+				/>
+			</div>
+			<div class="my-6">
+				<a
+					href=""
+					class="text-sm text-blue-500 hover:underline"
+					>Forgot Password?</a
+				>
+			</div>
+			<div class="flex flex-row gap-5">
+				<button
+					type="button"
+					name="login_button"
+					id="login_button"
+					class="h-max w-max rounded-lg bg-blue-700 px-5 py-2 text-center text-sm font-medium shadow text-white hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 disabled:bg-neutral-500"
+				>
+					Sign In
+				</button>
+				<div
+					id="spinner"
+					class="hidden flex align-middle items-center"
+				>
+					<i
+						class="fa-solid fa-circle-notch fa-spin text-blue-600 text-2xl"
+					></i>
+				</div>
+			</div>
+		</main>
+	</body>
 </html>
