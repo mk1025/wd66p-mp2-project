@@ -1,3 +1,4 @@
+var _a;
 import * as Routes from "../../scripts/routes";
 import { Modal } from "flowbite";
 const SectionModal = new Modal(document.getElementById("SectionModal"), {
@@ -531,3 +532,26 @@ function reloadFlowbiteScript() {
     newScript.defer = true;
     document.body.appendChild(newScript);
 }
+(_a = document.getElementById("LogoutButton")) === null || _a === void 0 ? void 0 : _a.addEventListener("click", () => {
+    $.ajax({
+        type: "POST",
+        url: Routes.SESSIONS_API,
+        data: "logout=" + JSON.stringify({ token: sessionStorage.getItem("token") }),
+        success: function (response) {
+            console.log("Successful Response: ", JSON.parse(response) || response);
+            sessionStorage.removeItem("token");
+            window.location.href = Routes.LOGIN_PAGE;
+        },
+        error: function (xhr, status, error) {
+            console.group("Logout Errors:");
+            console.error("(Error) XHR Status: ", xhr.status);
+            console.error("(Error) XHR Text: ", xhr.responseText);
+            console.error("(Error) Status: ", status);
+            console.error("Error: ", error);
+            console.groupEnd();
+            sessionStorage.removeItem("token");
+            if (xhr.status === 403)
+                window.location.href = Routes.LOGIN_PAGE;
+        },
+    });
+});
