@@ -2988,6 +2988,11 @@ input:checked + .toggle-bg {
   --tw-ring-color: rgb(132 204 22 / var(--tw-ring-opacity));
 }
 
+.focus\:ring-neutral-500:focus {
+  --tw-ring-opacity: 1;
+  --tw-ring-color: rgb(115 115 115 / var(--tw-ring-opacity));
+}
+
 .focus\:ring-orange-500:focus {
   --tw-ring-opacity: 1;
   --tw-ring-color: rgb(255 90 31 / var(--tw-ring-opacity));
