@@ -6,6 +6,8 @@ export const CLASSRECORDS_API = "../../api/classrecords.php";
 export const VIEWRECORD_API = "../../api/viewrecord.php";
 export const TRANSMUTATIONS_API = "../../api/transmutations.php";
 
+export const CHECKGRADES_API = "../../api/checkGrade.php";
+
 export const SESSIONS_API = "../../api/session.php";
 
 // PAGES
@@ -31,3 +33,6 @@ export const VIEWRECORD_PAGE_FROM_HOME = "./pages/viewrecord/";
 
 export const TRANSMUTATIONS_PAGE = "../transmutations";
 export const TRANSMUTATIONS_PAGE_FROM_HOME = "./pages/transmutations/";
+
+export const CHECKGRADES_PAGE = "../checkgrades";
+export const CHECKGRADES_PAGE_FROM_HOME = "./pages/checkgrades/";
