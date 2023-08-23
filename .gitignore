@@ -7,3 +7,4 @@ api/uploads
 api/env.prod.php
 
 .vscode
+.vercel
