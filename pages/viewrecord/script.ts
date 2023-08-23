@@ -4,33 +4,22 @@ import * as dts from "./script.d";
 // @ts-ignore
 import { Modal } from "flowbite";
 
-// CONSOLE LOG OPTION
-const ENABLE_CONSOLELOG = true;
+import { CONSOLE_LOG as ENABLE_CONSOLELOG } from "../../scripts/env";
 
 // ELEMENTS
-const ClassRecord_Title = document.getElementById(
-	"ClassRecordTitle",
-) as HTMLHeadingElement;
-const ClassRecord_Section = document.getElementById(
-	"ClassRecordSection",
-) as HTMLHeadingElement;
-const ClassRecord_SY = document.getElementById(
-	"ClassRecordSY",
-) as HTMLHeadingElement;
+const ClassRecord_Title = document.getElementById("ClassRecordTitle") as HTMLHeadingElement;
+const ClassRecord_Section = document.getElementById("ClassRecordSection") as HTMLHeadingElement;
+const ClassRecord_SY = document.getElementById("ClassRecordSY") as HTMLHeadingElement;
 
 // SPINNERS
 const SiteSpinner = document.getElementById("Site-Spinner") as HTMLDivElement;
-const ActionSpinner = document.getElementById(
-	"Action-Spinner",
-) as HTMLDivElement;
+const ActionSpinner = document.getElementById("Action-Spinner") as HTMLDivElement;
 
 // BUTTONS
 const ExitButton = document.getElementById("ExitButton") as HTMLButtonElement;
 ExitButton.onclick = () => (window.location.href = Routes.CLASSRECORDS_PAGE);
 
-const ActivityThemeButton = document.getElementById(
-	"ActivityModalThemeButton",
-) as HTMLButtonElement;
+const ActivityThemeButton = document.getElementById("ActivityModalThemeButton") as HTMLButtonElement;
 
 // INPUT ELEMENTS
 const ActivityColorRadio = document.querySelectorAll<HTMLInputElement>(
@@ -62,69 +51,41 @@ const ActivityModal = new Modal(document.getElementById("ActivityModal"), {
 		};
 	},
 });
-const ActivityModalTitle = document.getElementById(
-	"ActivityModalTitle",
-) as HTMLHeadingElement;
-const ActivityModal_NameInput = document.getElementById(
-	"ActivityModalNameInput",
-) as HTMLInputElement;
-const ActivityModal_TypeInput = document.getElementById(
-	"ActivityModalTypeInput",
-) as HTMLInputElement;
-const ActivityModalButton = document.getElementById(
-	"ActivityModalButton",
-) as HTMLButtonElement;
-const ActivityModalDeleteButton = document.getElementById(
-	"ActivityModalDeleteButton",
-) as HTMLButtonElement;
-const ActivityModalAddComponentButton = document.getElementById(
-	"ActivityModalAddComponentButton",
-) as HTMLButtonElement;
+const ActivityModalTitle = document.getElementById("ActivityModalTitle") as HTMLHeadingElement;
+const ActivityModal_NameInput = document.getElementById("ActivityModalNameInput") as HTMLInputElement;
+const ActivityModal_TypeInput = document.getElementById("ActivityModalTypeInput") as HTMLInputElement;
+const ActivityModalButton = document.getElementById("ActivityModalButton") as HTMLButtonElement;
+const ActivityModalDeleteButton = document.getElementById("ActivityModalDeleteButton") as HTMLButtonElement;
+const ActivityModalAddComponentButton = document.getElementById("ActivityModalAddComponentButton") as HTMLButtonElement;
 
-const ActivityComponentModal = new Modal(
-	document.getElementById("ActivityComponentModal"),
-	{
-		closable: false,
-		onShow: () => {
-			document.getElementById("ActivityComponentModalCloseButton")!.onclick =
-				() => {
-					ActivityComponentModal.hide();
-					ActivityModal.show();
-				};
-			document.getElementById("ActivityComponentModalCancelButton")!.onclick =
-				() => {
-					ActivityComponentModal.hide();
-					ActivityModal.show();
-				};
-		},
+const ActivityComponentModal = new Modal(document.getElementById("ActivityComponentModal"), {
+	closable: false,
+	onShow: () => {
+		document.getElementById("ActivityComponentModalCloseButton")!.onclick = () => {
+			ActivityComponentModal.hide();
+			ActivityModal.show();
+		};
+		document.getElementById("ActivityComponentModalCancelButton")!.onclick = () => {
+			ActivityComponentModal.hide();
+			ActivityModal.show();
+		};
 	},
-);
-const ActivityComponentModalButton = document.getElementById(
-	"ActivityComponentModalButton",
-) as HTMLButtonElement;
+});
+const ActivityComponentModalButton = document.getElementById("ActivityComponentModalButton") as HTMLButtonElement;
 
-const StudentActivityModal = new Modal(
-	document.getElementById("StudentActivityModal"),
-	{
-		closable: false,
-		onShow: () => {
-			document.getElementById("StudentActivityModalCloseButton")!.onclick =
-				() => {
-					StudentActivityModal.hide();
-				};
-			document.getElementById("StudentActivityModalCancelButton")!.onclick =
-				() => {
-					StudentActivityModal.hide();
-				};
-		},
+const StudentActivityModal = new Modal(document.getElementById("StudentActivityModal"), {
+	closable: false,
+	onShow: () => {
+		document.getElementById("StudentActivityModalCloseButton")!.onclick = () => {
+			StudentActivityModal.hide();
+		};
+		document.getElementById("StudentActivityModalCancelButton")!.onclick = () => {
+			StudentActivityModal.hide();
+		};
 	},
-);
-const StudentActivityModalTitle = document.getElementById(
-	"StudentActivityModalTitle",
-) as HTMLHeadingElement;
-const StudentActivityModalButton = document.getElementById(
-	"StudentActivityModalButton",
-) as HTMLButtonElement;
+});
+const StudentActivityModalTitle = document.getElementById("StudentActivityModalTitle") as HTMLHeadingElement;
+const StudentActivityModalButton = document.getElementById("StudentActivityModalButton") as HTMLButtonElement;
 
 const DeleteModal = new Modal(document.getElementById("DeleteModal"), {
 	closable: false,
@@ -137,12 +98,8 @@ const DeleteModal = new Modal(document.getElementById("DeleteModal"), {
 		};
 	},
 });
-const DeleteModalText = document.getElementById(
-	"DeleteModalText",
-) as HTMLHeadingElement;
-const DeleteModalButton = document.getElementById(
-	"DeleteModalButton",
-) as HTMLButtonElement;
+const DeleteModalText = document.getElementById("DeleteModalText") as HTMLHeadingElement;
+const DeleteModalButton = document.getElementById("DeleteModalButton") as HTMLButtonElement;
 
 const ErrorModal = new Modal(document.getElementById("ErrorModal"), {
 	closable: false,
@@ -155,9 +112,7 @@ const ErrorModal = new Modal(document.getElementById("ErrorModal"), {
 		};
 	},
 });
-const ErrorModalText = document.getElementById(
-	"ErrorModalText",
-) as HTMLHeadingElement;
+const ErrorModalText = document.getElementById("ErrorModalText") as HTMLHeadingElement;
 
 // DOM INIT
 document.addEventListener("DOMContentLoaded", () => {
@@ -174,8 +129,7 @@ document.addEventListener("DOMContentLoaded", () => {
 		data: "session=" + JSON.stringify(data),
 		success: function (response) {
 			SiteSpinner.classList.add("hidden");
-			ENABLE_CONSOLELOG &&
-				console.log("Successful Response: ", JSON.parse(response) || response);
+			ENABLE_CONSOLELOG && console.log("Successful Response: ", JSON.parse(response) || response);
 			getData();
 		},
 		error: function (xhr, status, error) {
@@ -195,8 +149,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // INITS
 function newActivityInit(record_id: string, component_id: string) {
-	ENABLE_CONSOLELOG &&
-		console.log("New Activity Init: ", { record_id, component_id });
+	ENABLE_CONSOLELOG && console.log("New Activity Init: ", { record_id, component_id });
 
 	ActivityModalDeleteButton.classList.add("hidden");
 
@@ -205,9 +158,7 @@ function newActivityInit(record_id: string, component_id: string) {
 	ActivityModal_TypeInput.value = "";
 	setActivityColor("amber");
 
-	const ComponentList = document.getElementById(
-		"ActivityComponentsTableBody",
-	) as HTMLTableSectionElement;
+	const ComponentList = document.getElementById("ActivityComponentsTableBody") as HTMLTableSectionElement;
 
 	ComponentList.innerHTML = "";
 
@@ -253,20 +204,12 @@ function editActivityInit(
 	ActivityModal_TypeInput.value = activity.type;
 	setActivityColor(activity.color);
 
-	const ComponentList = document.getElementById(
-		"ActivityComponentsTableBody",
-	) as HTMLTableSectionElement;
+	const ComponentList = document.getElementById("ActivityComponentsTableBody") as HTMLTableSectionElement;
 
 	ComponentList.innerHTML = "";
 
 	for (let component of activity.components) {
-		insertNewActivityComponent(
-			component.id,
-			component.name,
-			component.type,
-			component.score,
-			component.bonus,
-		);
+		insertNewActivityComponent(component.id, component.name, component.type, component.score, component.bonus);
 	}
 
 	ActivityModalAddComponentButton.onclick = () => {
@@ -296,11 +239,7 @@ function editActivityInit(
 	ActivityModal.show();
 }
 
-function deleteActivityInit(
-	component_id: string,
-	activity_id: string,
-	activity_name: string,
-) {
+function deleteActivityInit(component_id: string, activity_id: string, activity_name: string) {
 	ENABLE_CONSOLELOG &&
 		console.log("Delete Activity Init: ", {
 			component_id,
@@ -331,21 +270,11 @@ function deleteActivityInit(
 function newActivityComponentInit() {
 	ActivityModal.hide();
 
-	const Title = document.getElementById(
-		"ActivityComponentModalTitle",
-	) as HTMLHeadingElement;
-	const NameInput = document.getElementById(
-		"ACModalNameInput",
-	) as HTMLInputElement;
-	const TypeInput = document.getElementById(
-		"ACModalTypeInput",
-	) as HTMLInputElement;
-	const ScoreInput = document.getElementById(
-		"ACModalScoreInput",
-	) as HTMLInputElement;
-	const Checkbox = document.getElementById(
-		"ACModalBonusCheckbox",
-	) as HTMLInputElement;
+	const Title = document.getElementById("ActivityComponentModalTitle") as HTMLHeadingElement;
+	const NameInput = document.getElementById("ACModalNameInput") as HTMLInputElement;
+	const TypeInput = document.getElementById("ACModalTypeInput") as HTMLInputElement;
+	const ScoreInput = document.getElementById("ACModalScoreInput") as HTMLInputElement;
+	const Checkbox = document.getElementById("ACModalBonusCheckbox") as HTMLInputElement;
 	Title.innerText = "Add a New Activity Component";
 	NameInput.value = "";
 	TypeInput.value = "";
@@ -353,13 +282,7 @@ function newActivityComponentInit() {
 	Checkbox.checked = false;
 
 	ActivityComponentModalButton.onclick = () => {
-		insertNewActivityComponent(
-			null,
-			NameInput.value,
-			TypeInput.value,
-			parseInt(ScoreInput.value),
-			Checkbox.checked,
-		);
+		insertNewActivityComponent(null, NameInput.value, TypeInput.value, parseInt(ScoreInput.value), Checkbox.checked);
 	};
 }
 
@@ -371,21 +294,11 @@ function editActivityComponentInit(id: string) {
 
 	ActivityModal.hide();
 
-	const Title = document.getElementById(
-		"ActivityComponentModalTitle",
-	) as HTMLHeadingElement;
-	const NameInput = document.getElementById(
-		"ACModalNameInput",
-	) as HTMLInputElement;
-	const TypeInput = document.getElementById(
-		"ACModalTypeInput",
-	) as HTMLInputElement;
-	const ScoreInput = document.getElementById(
-		"ACModalScoreInput",
-	) as HTMLInputElement;
-	const Checkbox = document.getElementById(
-		"ACModalBonusCheckbox",
-	) as HTMLInputElement;
+	const Title = document.getElementById("ActivityComponentModalTitle") as HTMLHeadingElement;
+	const NameInput = document.getElementById("ACModalNameInput") as HTMLInputElement;
+	const TypeInput = document.getElementById("ACModalTypeInput") as HTMLInputElement;
+	const ScoreInput = document.getElementById("ACModalScoreInput") as HTMLInputElement;
+	const Checkbox = document.getElementById("ACModalBonusCheckbox") as HTMLInputElement;
 
 	const RowData = document.querySelector(`tr[id="${id}"]`);
 
@@ -403,25 +316,13 @@ function editActivityComponentInit(id: string) {
 }
 
 function editActivityComponentToTable(id: string) {
-	const ComponentList = document.getElementById(
-		"ActivityComponentsTableBody",
-	) as HTMLTableSectionElement;
+	const ComponentList = document.getElementById("ActivityComponentsTableBody") as HTMLTableSectionElement;
 
-	const Title = document.getElementById(
-		"ActivityComponentModalTitle",
-	) as HTMLHeadingElement;
-	const NameInput = document.getElementById(
-		"ACModalNameInput",
-	) as HTMLInputElement;
-	const TypeInput = document.getElementById(
-		"ACModalTypeInput",
-	) as HTMLInputElement;
-	const ScoreInput = document.getElementById(
-		"ACModalScoreInput",
-	) as HTMLInputElement;
-	const Checkbox = document.getElementById(
-		"ACModalBonusCheckbox",
-	) as HTMLInputElement;
+	const Title = document.getElementById("ActivityComponentModalTitle") as HTMLHeadingElement;
+	const NameInput = document.getElementById("ACModalNameInput") as HTMLInputElement;
+	const TypeInput = document.getElementById("ACModalTypeInput") as HTMLInputElement;
+	const ScoreInput = document.getElementById("ACModalScoreInput") as HTMLInputElement;
+	const Checkbox = document.getElementById("ACModalBonusCheckbox") as HTMLInputElement;
 
 	const RowData = ComponentList.querySelector(`tr[id="${id}"]`);
 
@@ -434,9 +335,7 @@ function editActivityComponentToTable(id: string) {
 	RowData!.querySelectorAll("td")[0].innerText = NameInput.value;
 	RowData!.querySelectorAll("td")[1].innerText = TypeInput.value;
 	RowData!.querySelectorAll("td")[2].innerText = ScoreInput.value;
-	RowData!.querySelectorAll("td")[3].innerText = Checkbox.checked
-		? "Yes"
-		: "No";
+	RowData!.querySelectorAll("td")[3].innerText = Checkbox.checked ? "Yes" : "No";
 
 	computeActivityComponents();
 	ActivityComponentModal.hide();
@@ -456,9 +355,14 @@ function editStudentActivity(
 			component_id,
 		});
 
-	const ActivityComponentList = document.getElementById(
-		"StudentActivityTableBody",
-	) as HTMLTableSectionElement;
+	const ActivityComponentList = document.getElementById("StudentActivityTableBody") as HTMLTableSectionElement;
+
+	const StudentActivityModalText = document.getElementById("StudentActivityModalText") as HTMLDivElement;
+
+	StudentActivityModalText.innerHTML = `
+		${activity.name} <br/><br/>
+		${activity.type} <br/><br/>
+	`;
 
 	ActivityComponentList.innerHTML = "";
 
@@ -471,10 +375,7 @@ function editStudentActivity(
 		ComponentRow.setAttribute("data-name", component.name);
 		ComponentRow.setAttribute("data-type", component.type);
 		ComponentRow.setAttribute("data-score", component.score.toString());
-		ComponentRow.setAttribute(
-			"data-bonus",
-			parseBool(component.bonus).toString(),
-		);
+		ComponentRow.setAttribute("data-bonus", parseBool(component.bonus).toString());
 
 		let findStudentScore = 0;
 		for (let activity of student.activities) {
@@ -501,14 +402,10 @@ function editStudentActivity(
         />
       </td>
       <td class='px-6 py-2 text-center'>${component.score}</td>
-      <td class='px-6 py-2 text-center'>${
-				parseBool(component.bonus.toString()) ? "Yes" : "No"
-			}</td>
+      <td class='px-6 py-2 text-center'>${parseBool(component.bonus.toString()) ? "Yes" : "No"}</td>
     `;
 
-		componentScoreTotal += !parseBool(component.bonus.toString())
-			? (component.score as number)
-			: 0;
+		componentScoreTotal += !parseBool(component.bonus.toString()) ? (component.score as number) : 0;
 		componentScoreTotalBonus += component.score as number;
 
 		ActivityComponentList.appendChild(ComponentRow);
@@ -520,8 +417,7 @@ function editStudentActivity(
 			ActivityComponentList.querySelectorAll("tr td input").forEach((input) => {
 				totalscore += parseInt((input as HTMLInputElement).value);
 			});
-			document.getElementById("StudentActivityStudentTotalScore")!.innerText =
-				totalscore.toString();
+			document.getElementById("StudentActivityStudentTotalScore")!.innerText = totalscore.toString();
 		});
 	});
 
@@ -570,11 +466,7 @@ function sendData(title: string, data: any) {
 		data: `${title}=` + JSON.stringify(sendData),
 		success: function (response) {
 			ActionSpinner.classList.add("hidden");
-			ENABLE_CONSOLELOG &&
-				console.log(
-					`Successful '${title}' response: `,
-					JSON.parse(response) || response,
-				);
+			ENABLE_CONSOLELOG && console.log(`Successful '${title}' response: `, JSON.parse(response) || response);
 			ActivityComponentModal.hide();
 			ActivityModal.hide();
 			getData();
@@ -592,9 +484,7 @@ function sendData(title: string, data: any) {
 			if (xhr.status === 403) window.location.href = Routes.LOGIN_PAGE;
 
 			let data = JSON.parse(xhr.responseText);
-			ErrorModalText.innerHTML = `Error:<br> ${data.title}<br><br> ${
-				data.message || "Internal Server Error"
-			}`;
+			ErrorModalText.innerHTML = `Error:<br> ${data.title}<br><br> ${data.message || "Internal Server Error"}`;
 			ErrorModal.show();
 		},
 	});
@@ -621,23 +511,15 @@ function getData() {
 		url: Routes.VIEWRECORD_API,
 		data: "getData=" + JSON.stringify(data),
 		success: function (response) {
-			ENABLE_CONSOLELOG &&
-				console.log(
-					"Successful GET DATA Response: ",
-					JSON.parse(response) || response,
-				);
+			ENABLE_CONSOLELOG && console.log("Successful GET DATA Response: ", JSON.parse(response) || response);
 			ClassRecord_Title.innerText = JSON.parse(response).data.name;
-			ClassRecord_Title.classList.add(
-				`text-${JSON.parse(response).data.color}-500`,
-			);
+			ClassRecord_Title.classList.add(`text-${JSON.parse(response).data.color}-500`);
 			ClassRecord_Section.innerText = JSON.parse(response).data.section_name;
-			ClassRecord_Section.classList.add(
-				`text-${JSON.parse(response).data.color}-400`,
-			);
+			ClassRecord_Section.classList.add(`text-${JSON.parse(response).data.color}-400`);
 
-			ClassRecord_SY.innerText = `S.Y. ${dateFormatter(
-				JSON.parse(response).data.syStart,
-			)} - ${dateFormatter(JSON.parse(response).data.syEnd)}`;
+			ClassRecord_SY.innerText = `S.Y. ${dateFormatter(JSON.parse(response).data.syStart)} - ${dateFormatter(
+				JSON.parse(response).data.syEnd,
+			)}`;
 			populateComponentList(JSON.parse(response).data);
 		},
 		error: function (xhr, status, error) {
@@ -678,9 +560,7 @@ function insertNewActivityComponent(
 			bonus,
 		});
 
-	const TableBody = document.getElementById(
-		"ActivityComponentsTableBody",
-	) as HTMLTableSectionElement;
+	const TableBody = document.getElementById("ActivityComponentsTableBody") as HTMLTableSectionElement;
 
 	const Row = document.createElement("tr");
 
@@ -695,23 +575,14 @@ function insertNewActivityComponent(
     <td class='p-2'>${name}</td>
     <td class='p-2'>${type}</td>
     <td class='p-2 text-center'>${score}</td>
-    <td class='p-2 text-center'>${
-			parseBool(bonus.toString()) ? "Yes" : "No"
-		}</td>
+    <td class='p-2 text-center'>${parseBool(bonus.toString()) ? "Yes" : "No"}</td>
   `;
 
 	const RowButtons = document.createElement("td");
 	RowButtons.classList.add("p-2", "flex", "flex-row", "gap-2", "justify-end");
 
 	const EditButton = document.createElement("button");
-	EditButton.classList.add(
-		"px-3",
-		"py-2",
-		"text-white",
-		"bg-blue-400",
-		"hover:bg-blue-600",
-		"rounded",
-	);
+	EditButton.classList.add("px-3", "py-2", "text-white", "bg-blue-400", "hover:bg-blue-600", "rounded");
 	EditButton.innerHTML = "<i class='fa-solid fas fa-cog'></i>";
 
 	EditButton.onclick = () => {
@@ -719,14 +590,7 @@ function insertNewActivityComponent(
 	};
 
 	const DeleteButton = document.createElement("button");
-	DeleteButton.classList.add(
-		"px-3",
-		"py-2",
-		"text-white",
-		"bg-red-400",
-		"hover:bg-red-600",
-		"rounded",
-	);
+	DeleteButton.classList.add("px-3", "py-2", "text-white", "bg-red-400", "hover:bg-red-600", "rounded");
 	DeleteButton.innerHTML = "<i class='fa-solid fas fa-trash'></i>";
 
 	DeleteButton.onclick = () => {
@@ -743,9 +607,7 @@ function insertNewActivityComponent(
 }
 
 function deleteActivityComponent(id: string, name: string) {
-	const TableBody = document.getElementById(
-		"ActivityComponentsTableBody",
-	) as HTMLTableSectionElement;
+	const TableBody = document.getElementById("ActivityComponentsTableBody") as HTMLTableSectionElement;
 
 	DeleteModalText.innerText = `Are you sure you want to delete '${name}' component?`;
 
@@ -763,9 +625,7 @@ function deleteActivityComponent(id: string, name: string) {
 }
 
 function populateComponentList(record: dts.InterfaceRecord) {
-	const ComponentsList = document.getElementById(
-		"ComponentsList",
-	) as HTMLElement;
+	const ComponentsList = document.getElementById("ComponentsList") as HTMLElement;
 
 	ComponentsList.innerHTML = "";
 
@@ -825,28 +685,17 @@ function populateComponentList(record: dts.InterfaceRecord) {
         <th rowspan='2' scope='col' class='px-6 py-3 align-bottom'>Gender</th>
         <th rowspan='2' scope='col' class='px-6 py-3 align-bottom'>Last Name</th>
         <th rowspan='2' scope='col' class='px-6 py-3 align-bottom'>First Name</th>
-        <th colspan='${
-					component.activities.length + 1
-				}' scope='col' class='px-6 py-3 align-bottom'>Activities</th>
+        <th colspan='${component.activities.length + 1}' scope='col' class='px-6 py-3 align-bottom'>Activities</th>
         <th scope='col' class='px-6 py-3 text-center'>Total Score</th>
         <th scope='col' class='px-6 py-3 text-center'>Percentage Score</th>
         <th scope='col' class='px-6 py-3 text-center'>Weighted Score</th>
       </tr>
      `;
 		const TableHeaderRow = document.createElement("tr");
-		TableHeaderRow.classList.add(
-			"font-medium",
-			"text-center",
-			`bg-${record.color}-100`,
-		);
+		TableHeaderRow.classList.add("font-medium", "text-center", `bg-${record.color}-100`);
 		for (let activity of component.activities) {
 			const TableHead = document.createElement("th");
-			TableHead.classList.add(
-				"px-6",
-				"py-3",
-				"border-x",
-				"border-x-neutral-400",
-			);
+			TableHead.classList.add("px-6", "py-3", "border-x", "border-x-neutral-400");
 			TableHead.setAttribute("scope", "col");
 
 			const Button = document.createElement("button");
@@ -884,12 +733,7 @@ function populateComponentList(record: dts.InterfaceRecord) {
 
 		const NewActivityHead = document.createElement("th");
 		NewActivityHead.setAttribute("scope", "col");
-		NewActivityHead.classList.add(
-			"px-6",
-			"py-3",
-			"border-x",
-			"border-x-neutral-400",
-		);
+		NewActivityHead.classList.add("px-6", "py-3", "border-x", "border-x-neutral-400");
 
 		const NewActivityButton = document.createElement("button");
 		NewActivityButton.classList.add(
@@ -948,14 +792,11 @@ function populateComponentList(record: dts.InterfaceRecord) {
 			const TableBodyRow = document.createElement("tr");
 			change_bg && TableBodyRow.classList.add(`bg-${record.color}-100`);
 
-			let genderData =
-				"<td class='px-6 py-3 text-neutral-500'><i class='fa-solid fa-venus-mars'></i> Other </td>";
+			let genderData = "<td class='px-6 py-3 text-neutral-500'><i class='fa-solid fa-venus-mars'></i> Other </td>";
 			if (student.gender.toUpperCase() === "MALE")
-				genderData =
-					"<td class='px-6 py-3 text-blue-500'><i class='fa-solid fa-mars'></i> Male </td>";
+				genderData = "<td class='px-6 py-3 text-blue-500'><i class='fa-solid fa-mars'></i> Male </td>";
 			if (student.gender.toUpperCase() === "FEMALE")
-				genderData =
-					"<td class='px-6 py-3 text-pink-500'><i class='fa-solid fa-venus'></i> Female </td>";
+				genderData = "<td class='px-6 py-3 text-pink-500'><i class='fa-solid fa-venus'></i> Female </td>";
 
 			TableBodyRow.innerHTML = `
         <td class='px-6 py-3 font-mono text-neutral-400'>${student.id}</td>
@@ -967,13 +808,7 @@ function populateComponentList(record: dts.InterfaceRecord) {
 			let studentTotalScore = 0;
 			for (let activity of component.activities) {
 				const TableData = document.createElement("td");
-				TableData.classList.add(
-					"px-6",
-					"py-3",
-					"border-x",
-					"border-x-neutral-400",
-					"justify-center",
-				);
+				TableData.classList.add("px-6", "py-3", "border-x", "border-x-neutral-400", "justify-center");
 
 				const TableDataButton = document.createElement("button");
 				TableDataButton.classList.add(
@@ -1039,11 +874,7 @@ function populateComponentList(record: dts.InterfaceRecord) {
         ${studentTotalScore} / ${getActivityTotalScore}
         </td>
         <td class='px-6 py-3 text-center border-x border-x-neutral-400 font-semibold'>
-        ${
-					studentTotalScore > 0
-						? ((studentTotalScore / getActivityTotalScore) * 100).toFixed(2)
-						: 0
-				} %
+        ${studentTotalScore > 0 ? ((studentTotalScore / getActivityTotalScore) * 100).toFixed(2) : 0} %
         </td>
         <td class='px-6 py-3 text-center border-x border-x-neutral-400 font-semibold'>
         ${
@@ -1157,11 +988,7 @@ function populateComponentList(record: dts.InterfaceRecord) {
     
   `;
 	let FG_TableHeaderRow = document.createElement("tr");
-	FG_TableHeaderRow.classList.add(
-		"bg-gray-100",
-		"text-gray-500",
-		"text-center",
-	);
+	FG_TableHeaderRow.classList.add("bg-gray-100", "text-gray-500", "text-center");
 
 	for (let component of record.components) {
 		FG_TableHeaderRow.innerHTML += `
@@ -1222,14 +1049,11 @@ function populateComponentList(record: dts.InterfaceRecord) {
 		const FG_TableBodyRow = document.createElement("tr");
 		change_bg && FG_TableBodyRow.classList.add(`bg-gray-100`);
 
-		let genderDisplay =
-			"<td class='px-6 py-3 text-neutral-500'><i class='fa-solid fa-venus-mars'></i> Other </td>";
+		let genderDisplay = "<td class='px-6 py-3 text-neutral-500'><i class='fa-solid fa-venus-mars'></i> Other </td>";
 		if (student.gender.toUpperCase() === "MALE")
-			genderDisplay =
-				"<td class='px-6 py-3 text-blue-500'><i class='fa-solid fa-mars'></i> Male </td>";
+			genderDisplay = "<td class='px-6 py-3 text-blue-500'><i class='fa-solid fa-mars'></i> Male </td>";
 		if (student.gender.toUpperCase() === "FEMALE")
-			genderDisplay =
-				"<td class='px-6 py-3 text-pink-500'><i class='fa-solid fa-venus'></i> Female </td>";
+			genderDisplay = "<td class='px-6 py-3 text-pink-500'><i class='fa-solid fa-venus'></i> Female </td>";
 
 		FG_TableBodyRow.innerHTML = `
       <td class='px-6 py-3 font-mono text-neutral-400'>${student.id}</td>
@@ -1245,8 +1069,7 @@ function populateComponentList(record: dts.InterfaceRecord) {
 
 			for (let activity of component.activities) {
 				for (let activityComponent of activity.components) {
-					if (!activityComponent.bonus)
-						componentSum += parseInt(activityComponent.score as string) || 0;
+					if (!activityComponent.bonus) componentSum += parseInt(activityComponent.score as string) || 0;
 				}
 			}
 
@@ -1266,31 +1089,20 @@ function populateComponentList(record: dts.InterfaceRecord) {
 			}
 
 			let totalWeighted =
-				LinearScale(
-					0,
-					100,
-					0,
-					parseInt(component.score as string) || 0,
-					(studentSum / componentSum) * 100,
-				) || 0;
+				LinearScale(0, 100, 0, parseInt(component.score as string) || 0, (studentSum / componentSum) * 100) || 0;
 
 			componentScoreList.push(totalWeighted);
 		}
 
 		for (let score of componentScoreList) {
 			FG_TableBodyRow.innerHTML += `
-        <td class='px-6 py-3 border-x border-x-neutral-400 text-center text-gray-400'>${score.toFixed(
-					2,
-				)}%</td>
+        <td class='px-6 py-3 border-x border-x-neutral-400 text-center text-gray-400'>${score.toFixed(2)}%</td>
       `;
 		}
 
 		// ENABLE_CONSOLELOG && console.log(componentScoreList);
 
-		let totalStudentPercentage = componentScoreList.reduce(
-			(sum, score) => sum + score,
-			0,
-		);
+		let totalStudentPercentage = componentScoreList.reduce((sum, score) => sum + score, 0);
 
 		let componentTotalPercentage = record.components.reduce(
 			(sum, component) => sum + parseInt(component.score as string) || 0,
@@ -1341,12 +1153,8 @@ function populateComponentList(record: dts.InterfaceRecord) {
 // OTHER FUNCTIONS
 
 function computeActivityComponents() {
-	const AC_TableBody = document.getElementById(
-		"ActivityComponentsTableBody",
-	) as HTMLTableSectionElement;
-	const AC_TotalScore = document.getElementById(
-		"ActivityComponentsTotalScore",
-	) as HTMLTableCellElement;
+	const AC_TableBody = document.getElementById("ActivityComponentsTableBody") as HTMLTableSectionElement;
+	const AC_TotalScore = document.getElementById("ActivityComponentsTotalScore") as HTMLTableCellElement;
 
 	let sum = 0;
 	let sumbonus = 0;
@@ -1363,9 +1171,7 @@ function computeActivityComponents() {
 }
 
 function getActivityComponents() {
-	const AC_TableBody = document.getElementById(
-		"ActivityComponentsTableBody",
-	) as HTMLTableSectionElement;
+	const AC_TableBody = document.getElementById("ActivityComponentsTableBody") as HTMLTableSectionElement;
 	let data: Array<{
 		id: string;
 		name: string;
@@ -1387,9 +1193,7 @@ function getActivityComponents() {
 }
 
 function getStudentActivityComponentScores() {
-	const TableBody = document.getElementById(
-		"StudentActivityTableBody",
-	) as HTMLTableSectionElement;
+	const TableBody = document.getElementById("StudentActivityTableBody") as HTMLTableSectionElement;
 
 	let data: Array<{
 		component_id: string;
@@ -1411,13 +1215,7 @@ function getStudentActivityComponentScores() {
 	return data;
 }
 
-function LinearScale(
-	min: number,
-	max: number,
-	start: number,
-	end: number,
-	x: number,
-) {
+function LinearScale(min: number, max: number, start: number, end: number, x: number) {
 	return start + (end - start) * ((x - min) / (max - min));
 }
 
@@ -1474,18 +1272,10 @@ function parseBool(value: string | boolean) {
 	if (typeof value === "string") {
 		// Convert common string representations of boolean values
 		const lowerCaseValue = value.toLowerCase();
-		if (
-			lowerCaseValue === "true" ||
-			lowerCaseValue === "1" ||
-			lowerCaseValue === "yes"
-		) {
+		if (lowerCaseValue === "true" || lowerCaseValue === "1" || lowerCaseValue === "yes") {
 			return true;
 		}
-		if (
-			lowerCaseValue === "false" ||
-			lowerCaseValue === "0" ||
-			lowerCaseValue === "no"
-		) {
+		if (lowerCaseValue === "false" || lowerCaseValue === "0" || lowerCaseValue === "no") {
 			return false;
 		}
 	}

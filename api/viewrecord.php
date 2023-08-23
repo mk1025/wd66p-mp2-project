@@ -4,6 +4,9 @@ include_once "config.php";
 
 session_start();
 
+// error_reporting(E_ALL);
+// ini_set('display_errors', 1);
+
 if (isset($_POST['session']) && isset($_SESSION["uid"])) {
     /*
          ! DO NOT CLOSE THE DB CONNECTION HERE
@@ -488,7 +491,7 @@ if (isset($_POST['addActivity'])) {
         )
         VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())";
         $stmt = $connection->prepare($query);
-        $stmt->bind_param("ssssss", $newActivityUID, $newActivityComponentUID, $component->name, $component->type, $component->score, $component->bonus);
+        $stmt->bind_param("ssssii", $newActivityUID, $newActivityComponentUID, $component->name, $component->type, $component->score, $component->bonus);
         $stmt->execute();
         $stmt->close();
 
@@ -517,7 +520,9 @@ if (isset($_POST['addActivity'])) {
     }
 
     // test
-    echo createResponse(200, "No Response but Successful", "", "", "");
+    http_response_code(200);
+    echo createResponse(200, "Add Activity Succesful", "", "", "");
+    exit();
 }
 
 if (isset($_POST['updateActivity'])) {
@@ -729,7 +734,7 @@ if (isset($_POST['updateActivity'])) {
                 )
                 VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())";
                 $stmt = $connection->prepare($query);
-                $stmt->bind_param("ssssss", $postData->activity_id, $newActivityComponentUID, $component->name, $component->type, $component->score, $component->bonus);
+                $stmt->bind_param("ssssii", $postData->activity_id, $newActivityComponentUID, $component->name, $component->type, $component->score, $component->bonus);
                 $stmt->execute();
 
                 $query = "SELECT * FROM " . TBL_STUDENTS . " WHERE section_id IN
@@ -765,7 +770,7 @@ if (isset($_POST['updateActivity'])) {
                     updated_at = NOW()
                     WHERE component_name = ? AND activity_id = ?";
                 $stmt = $connection->prepare($query);
-                $stmt->bind_param("ssssss", $component->name, $component->type, $component->score, $component->bonus, $component->name, $postData->activity_id);
+                $stmt->bind_param("ssiiss", $component->name, $component->type, $component->score, $component->bonus, $component->name, $postData->activity_id);
                 $stmt->execute();
                 $stmt->close();
 
@@ -788,7 +793,7 @@ if (isset($_POST['updateActivity'])) {
                 updated_at = NOW()
             WHERE uid = ? AND activity_id = ?";
             $stmt = $connection->prepare($query);
-            $stmt->bind_param("ssssss", $component->name, $component->type, $component->score, $component->bonus, $component->id, $postData->activity_id);
+            $stmt->bind_param("ssiiss", $component->name, $component->type, $component->score, $component->bonus, $component->id, $postData->activity_id);
             $stmt->execute();
             $stmt->close();
 

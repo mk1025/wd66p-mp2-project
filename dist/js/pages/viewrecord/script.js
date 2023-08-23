@@ -1,6 +1,6 @@
 import * as Routes from "../../scripts/routes";
 import { Modal } from "flowbite";
-const ENABLE_CONSOLELOG = true;
+import { CONSOLE_LOG as ENABLE_CONSOLELOG } from "../../scripts/env";
 const ClassRecord_Title = document.getElementById("ClassRecordTitle");
 const ClassRecord_Section = document.getElementById("ClassRecordSection");
 const ClassRecord_SY = document.getElementById("ClassRecordSY");
@@ -41,30 +41,26 @@ const ActivityModalAddComponentButton = document.getElementById("ActivityModalAd
 const ActivityComponentModal = new Modal(document.getElementById("ActivityComponentModal"), {
     closable: false,
     onShow: () => {
-        document.getElementById("ActivityComponentModalCloseButton").onclick =
-            () => {
-                ActivityComponentModal.hide();
-                ActivityModal.show();
-            };
-        document.getElementById("ActivityComponentModalCancelButton").onclick =
-            () => {
-                ActivityComponentModal.hide();
-                ActivityModal.show();
-            };
+        document.getElementById("ActivityComponentModalCloseButton").onclick = () => {
+            ActivityComponentModal.hide();
+            ActivityModal.show();
+        };
+        document.getElementById("ActivityComponentModalCancelButton").onclick = () => {
+            ActivityComponentModal.hide();
+            ActivityModal.show();
+        };
     },
 });
 const ActivityComponentModalButton = document.getElementById("ActivityComponentModalButton");
 const StudentActivityModal = new Modal(document.getElementById("StudentActivityModal"), {
     closable: false,
     onShow: () => {
-        document.getElementById("StudentActivityModalCloseButton").onclick =
-            () => {
-                StudentActivityModal.hide();
-            };
-        document.getElementById("StudentActivityModalCancelButton").onclick =
-            () => {
-                StudentActivityModal.hide();
-            };
+        document.getElementById("StudentActivityModalCloseButton").onclick = () => {
+            StudentActivityModal.hide();
+        };
+        document.getElementById("StudentActivityModalCancelButton").onclick = () => {
+            StudentActivityModal.hide();
+        };
     },
 });
 const StudentActivityModalTitle = document.getElementById("StudentActivityModalTitle");
@@ -107,8 +103,7 @@ document.addEventListener("DOMContentLoaded", () => {
         data: "session=" + JSON.stringify(data),
         success: function (response) {
             SiteSpinner.classList.add("hidden");
-            ENABLE_CONSOLELOG &&
-                console.log("Successful Response: ", JSON.parse(response) || response);
+            ENABLE_CONSOLELOG && console.log("Successful Response: ", JSON.parse(response) || response);
             getData();
         },
         error: function (xhr, status, error) {
@@ -127,8 +122,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 function newActivityInit(record_id, component_id) {
-    ENABLE_CONSOLELOG &&
-        console.log("New Activity Init: ", { record_id, component_id });
+    ENABLE_CONSOLELOG && console.log("New Activity Init: ", { record_id, component_id });
     ActivityModalDeleteButton.classList.add("hidden");
     ActivityModalTitle.innerText = "Add a New Activity";
     ActivityModal_NameInput.value = "";
@@ -271,9 +265,7 @@ function editActivityComponentToTable(id) {
     RowData.querySelectorAll("td")[0].innerText = NameInput.value;
     RowData.querySelectorAll("td")[1].innerText = TypeInput.value;
     RowData.querySelectorAll("td")[2].innerText = ScoreInput.value;
-    RowData.querySelectorAll("td")[3].innerText = Checkbox.checked
-        ? "Yes"
-        : "No";
+    RowData.querySelectorAll("td")[3].innerText = Checkbox.checked ? "Yes" : "No";
     computeActivityComponents();
     ActivityComponentModal.hide();
 }
@@ -286,6 +278,11 @@ function editStudentActivity(record_id, activity, student, component_id) {
             component_id,
         });
     const ActivityComponentList = document.getElementById("StudentActivityTableBody");
+    const StudentActivityModalText = document.getElementById("StudentActivityModalText");
+    StudentActivityModalText.innerHTML = `
+		${activity.name} <br/><br/>
+		${activity.type} <br/><br/>
+	`;
     ActivityComponentList.innerHTML = "";
     let componentScoreTotal = 0;
     let componentScoreTotalBonus = 0;
@@ -322,9 +319,7 @@ function editStudentActivity(record_id, activity, student, component_id) {
       <td class='px-6 py-2 text-center'>${component.score}</td>
       <td class='px-6 py-2 text-center'>${parseBool(component.bonus.toString()) ? "Yes" : "No"}</td>
     `;
-        componentScoreTotal += !parseBool(component.bonus.toString())
-            ? component.score
-            : 0;
+        componentScoreTotal += !parseBool(component.bonus.toString()) ? component.score : 0;
         componentScoreTotalBonus += component.score;
         ActivityComponentList.appendChild(ComponentRow);
     }
@@ -334,8 +329,7 @@ function editStudentActivity(record_id, activity, student, component_id) {
             ActivityComponentList.querySelectorAll("tr td input").forEach((input) => {
                 totalscore += parseInt(input.value);
             });
-            document.getElementById("StudentActivityStudentTotalScore").innerText =
-                totalscore.toString();
+            document.getElementById("StudentActivityStudentTotalScore").innerText = totalscore.toString();
         });
     });
     document.getElementById("StudentActivityTotalScore").innerText = `${componentScoreTotal} / ${componentScoreTotalBonus}`;
@@ -364,8 +358,7 @@ function sendData(title, data) {
         data: `${title}=` + JSON.stringify(sendData),
         success: function (response) {
             ActionSpinner.classList.add("hidden");
-            ENABLE_CONSOLELOG &&
-                console.log(`Successful '${title}' response: `, JSON.parse(response) || response);
+            ENABLE_CONSOLELOG && console.log(`Successful '${title}' response: `, JSON.parse(response) || response);
             ActivityComponentModal.hide();
             ActivityModal.hide();
             getData();
@@ -404,8 +397,7 @@ function getData() {
         url: Routes.VIEWRECORD_API,
         data: "getData=" + JSON.stringify(data),
         success: function (response) {
-            ENABLE_CONSOLELOG &&
-                console.log("Successful GET DATA Response: ", JSON.parse(response) || response);
+            ENABLE_CONSOLELOG && console.log("Successful GET DATA Response: ", JSON.parse(response) || response);
             ClassRecord_Title.innerText = JSON.parse(response).data.name;
             ClassRecord_Title.classList.add(`text-${JSON.parse(response).data.color}-500`);
             ClassRecord_Section.innerText = JSON.parse(response).data.section_name;
@@ -589,11 +581,9 @@ function populateComponentList(record) {
             change_bg && TableBodyRow.classList.add(`bg-${record.color}-100`);
             let genderData = "<td class='px-6 py-3 text-neutral-500'><i class='fa-solid fa-venus-mars'></i> Other </td>";
             if (student.gender.toUpperCase() === "MALE")
-                genderData =
-                    "<td class='px-6 py-3 text-blue-500'><i class='fa-solid fa-mars'></i> Male </td>";
+                genderData = "<td class='px-6 py-3 text-blue-500'><i class='fa-solid fa-mars'></i> Male </td>";
             if (student.gender.toUpperCase() === "FEMALE")
-                genderData =
-                    "<td class='px-6 py-3 text-pink-500'><i class='fa-solid fa-venus'></i> Female </td>";
+                genderData = "<td class='px-6 py-3 text-pink-500'><i class='fa-solid fa-venus'></i> Female </td>";
             TableBodyRow.innerHTML = `
         <td class='px-6 py-3 font-mono text-neutral-400'>${student.id}</td>
         ${genderData}
@@ -638,9 +628,7 @@ function populateComponentList(record) {
         ${studentTotalScore} / ${getActivityTotalScore}
         </td>
         <td class='px-6 py-3 text-center border-x border-x-neutral-400 font-semibold'>
-        ${studentTotalScore > 0
-                ? ((studentTotalScore / getActivityTotalScore) * 100).toFixed(2)
-                : 0} %
+        ${studentTotalScore > 0 ? ((studentTotalScore / getActivityTotalScore) * 100).toFixed(2) : 0} %
         </td>
         <td class='px-6 py-3 text-center border-x border-x-neutral-400 font-semibold'>
         ${LinearScale(0, 100, 0, parseInt(component.score) || 0, (studentTotalScore / getActivityTotalScore) * 100 || 0).toFixed(2) || 0} %
@@ -756,11 +744,9 @@ function populateComponentList(record) {
         change_bg && FG_TableBodyRow.classList.add(`bg-gray-100`);
         let genderDisplay = "<td class='px-6 py-3 text-neutral-500'><i class='fa-solid fa-venus-mars'></i> Other </td>";
         if (student.gender.toUpperCase() === "MALE")
-            genderDisplay =
-                "<td class='px-6 py-3 text-blue-500'><i class='fa-solid fa-mars'></i> Male </td>";
+            genderDisplay = "<td class='px-6 py-3 text-blue-500'><i class='fa-solid fa-mars'></i> Male </td>";
         if (student.gender.toUpperCase() === "FEMALE")
-            genderDisplay =
-                "<td class='px-6 py-3 text-pink-500'><i class='fa-solid fa-venus'></i> Female </td>";
+            genderDisplay = "<td class='px-6 py-3 text-pink-500'><i class='fa-solid fa-venus'></i> Female </td>";
         FG_TableBodyRow.innerHTML = `
       <td class='px-6 py-3 font-mono text-neutral-400'>${student.id}</td>
       ${genderDisplay}
@@ -917,14 +903,10 @@ function parseBool(value) {
     }
     if (typeof value === "string") {
         const lowerCaseValue = value.toLowerCase();
-        if (lowerCaseValue === "true" ||
-            lowerCaseValue === "1" ||
-            lowerCaseValue === "yes") {
+        if (lowerCaseValue === "true" || lowerCaseValue === "1" || lowerCaseValue === "yes") {
             return true;
         }
-        if (lowerCaseValue === "false" ||
-            lowerCaseValue === "0" ||
-            lowerCaseValue === "no") {
+        if (lowerCaseValue === "false" || lowerCaseValue === "0" || lowerCaseValue === "no") {
             return false;
         }
     }
