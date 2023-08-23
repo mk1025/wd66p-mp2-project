@@ -142,7 +142,7 @@ function createNewUser($data)
             );
 
             if ($stmt->execute()) {
-                echo createResponse(201, "Registration Complete", "Log In from the Homepage", "", "");
+                echo createResponse(201, "Registration Complete", "You will be redirected to the Login Page in a moment...", "", "");
 
                 $newUID = "";
 
