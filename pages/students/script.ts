@@ -1,4 +1,6 @@
 import * as Routes from "../../scripts/routes";
+import * as Env from "../../scripts/env";
+
 // @ts-ignore
 import { Modal } from "flowbite";
 
@@ -13,46 +15,24 @@ const StudentModal = new Modal(document.getElementById("StudentModal"), {
 });
 
 const Site_Spinner = document.getElementById("Site-Spinner") as HTMLDivElement;
-const Action_Spinner = document.getElementById(
-	"Action-Spinner",
-) as HTMLDivElement;
+const Action_Spinner = document.getElementById("Action-Spinner") as HTMLDivElement;
 
 const SectionsContainer = document.getElementById("Sections") as HTMLDivElement;
 
-const AddNewSectionButton = document.getElementById(
-	"AddNewSectionButton",
-) as HTMLButtonElement;
+const AddNewSectionButton = document.getElementById("AddNewSectionButton") as HTMLButtonElement;
 
-const SectionModalTitle = document.getElementById(
-	"SectionModalTitle",
-) as HTMLElement;
-const SectionModalNameInput = document.getElementById(
-	"SectionModalNameInput",
-) as HTMLInputElement;
-const SectionModalSYStartInput = document.getElementById(
-	"SectionModalSYStartInput",
-) as HTMLInputElement;
-const SectionModalSYEndInput = document.getElementById(
-	"SectionModalSYEndInput",
-) as HTMLInputElement;
-const SectionModalButton = document.getElementById(
-	"SectionModalButton",
-) as HTMLButtonElement;
+const SectionModalTitle = document.getElementById("SectionModalTitle") as HTMLElement;
+const SectionModalNameInput = document.getElementById("SectionModalNameInput") as HTMLInputElement;
+const SectionModalSYStartInput = document.getElementById("SectionModalSYStartInput") as HTMLInputElement;
+const SectionModalSYEndInput = document.getElementById("SectionModalSYEndInput") as HTMLInputElement;
+const SectionModalButton = document.getElementById("SectionModalButton") as HTMLButtonElement;
 
-const SectionThemeButton = document.getElementById(
-	"SectionModalThemeButton",
-) as HTMLButtonElement;
+const SectionThemeButton = document.getElementById("SectionModalThemeButton") as HTMLButtonElement;
 
-const SectionColorRadio = document.querySelectorAll<HTMLInputElement>(
-	'input[type="radio"][name="SectionColorRadio"]',
-);
+const SectionColorRadio = document.querySelectorAll<HTMLInputElement>('input[type="radio"][name="SectionColorRadio"]');
 
-const DeleteModalText = document.getElementById(
-	"DeleteModalText",
-) as HTMLElement;
-const DeleteModalButton = document.getElementById(
-	"DeleteModalButton",
-) as HTMLButtonElement;
+const DeleteModalText = document.getElementById("DeleteModalText") as HTMLElement;
+const DeleteModalButton = document.getElementById("DeleteModalButton") as HTMLButtonElement;
 
 document.addEventListener("DOMContentLoaded", function () {
 	populateSections();
@@ -151,12 +131,12 @@ function editSectionInit(data: Section) {
 		Button: SectionModalButton.getAttribute("onclick")?.toString(),
 	};
 
-	console.log("Edit Section Init: ", display);
+	Env.CONSOLE_LOG && console.log("Edit Section Init: ", display);
 	SectionModal.show();
 }
 
 function deleteSectionInit(data: any) {
-	console.log("Delete Section INIT: ", data);
+	Env.CONSOLE_LOG && console.log("Delete Section INIT: ", data);
 	DeleteModalText.innerText = `Are you sure you want to delete '${data.name}' section? All students and their scores in this section will be deleted also.`;
 	DeleteModalButton.onclick = () => {
 		DeleteModal.hide();
@@ -182,9 +162,7 @@ function addStudentInit(data: any) {
 		StudentModal.hide();
 	};
 
-	let firstNameInput = document.getElementById(
-		"first_name",
-	) as HTMLInputElement;
+	let firstNameInput = document.getElementById("first_name") as HTMLInputElement;
 	let lastNameInput = document.getElementById("last_name") as HTMLInputElement;
 	let genderInput = document.getElementById("gender") as HTMLSelectElement;
 	let birthdayInput = document.getElementById("birthday") as HTMLInputElement;
@@ -220,10 +198,8 @@ function editStudentInit(section: string, data: any) {
 		StudentModal.hide();
 	};
 
-	console.log("Edit Student Init: ", { section, data });
-	let firstNameInput = document.getElementById(
-		"first_name",
-	) as HTMLInputElement;
+	Env.CONSOLE_LOG && console.log("Edit Student Init: ", { section, data });
+	let firstNameInput = document.getElementById("first_name") as HTMLInputElement;
 	let lastNameInput = document.getElementById("last_name") as HTMLInputElement;
 	let genderInput = document.getElementById("gender") as HTMLSelectElement;
 	let birthdayInput = document.getElementById("birthday") as HTMLInputElement;
@@ -256,7 +232,7 @@ function deleteStudentInit(section: string, data: any) {
 		DeleteModal.hide();
 	};
 
-	console.log("Delete Student Init: ", { section, data });
+	Env.CONSOLE_LOG && console.log("Delete Student Init: ", { section, data });
 
 	DeleteModalText.innerText = `Are you sure you want to delete '${data.first_name}' student from this section?`;
 
@@ -299,17 +275,17 @@ function sendDataSection(title: string, data: any) {
 		data: `${title}=` + JSON.stringify(postData),
 		success: function (response) {
 			Action_Spinner.classList.add("hidden");
-			console.log("Successful Response: ", JSON.parse(response) || response);
+			Env.CONSOLE_LOG && console.log("Successful Response: ", JSON.parse(response) || response);
 			populateSections();
 
 			handleResponseData(JSON.parse(response));
 		},
 		error: function (xhr, status, error) {
 			Action_Spinner.classList.add("hidden");
-			console.log("XHR Status: ", xhr.status);
-			console.log("XHR Text: ", xhr.responseText);
-			console.log("Status: ", status);
-			console.error("Error: ", error);
+			Env.CONSOLE_LOG && console.log("XHR Status: ", xhr.status);
+			Env.CONSOLE_LOG && console.log("XHR Text: ", xhr.responseText);
+			Env.CONSOLE_LOG && console.log("Status: ", status);
+			Env.CONSOLE_LOG && console.error("Error: ", error);
 			handleResponseData(JSON.parse(xhr.responseText));
 		},
 	});
@@ -328,7 +304,7 @@ function sendDataStudent(title: string, data: any) {
 		birthday: data.birthday,
 	};
 
-	console.log(postData);
+	Env.CONSOLE_LOG && console.log(postData);
 
 	$.ajax({
 		type: "POST",
@@ -336,16 +312,16 @@ function sendDataStudent(title: string, data: any) {
 		data: `${title}=` + JSON.stringify(postData),
 		success: function (response) {
 			Action_Spinner.classList.add("hidden");
-			console.log("Successful Response: ", JSON.parse(response) || response);
+			Env.CONSOLE_LOG && console.log("Successful Response: ", JSON.parse(response) || response);
 			populateSections();
 			handleResponseData(JSON.parse(response));
 		},
 		error: function (xhr, status, error) {
 			Action_Spinner.classList.add("hidden");
-			console.log("XHR Status: ", xhr.status);
-			console.log("XHR Text: ", xhr.responseText);
-			console.log("Status: ", status);
-			console.error("Error: ", error);
+			Env.CONSOLE_LOG && console.log("XHR Status: ", xhr.status);
+			Env.CONSOLE_LOG && console.log("XHR Text: ", xhr.responseText);
+			Env.CONSOLE_LOG && console.log("Status: ", status);
+			Env.CONSOLE_LOG && console.error("Error: ", error);
 			handleResponseData(JSON.parse(xhr.responseText));
 		},
 	});
@@ -363,7 +339,7 @@ function populateSections() {
 		url: Routes.STUDENTS_API,
 		data: "populate=" + JSON.stringify(data),
 		success: function (response) {
-			console.log("Successful Response: ", JSON.parse(response) || response);
+			Env.CONSOLE_LOG && console.log("Successful Response: ", JSON.parse(response) || response);
 			if (JSON.parse(response) && JSON.parse(response).data.length !== 0) {
 				let data = JSON.parse(response).data;
 				SectionsContainer.innerHTML = `
@@ -380,10 +356,10 @@ function populateSections() {
 			Action_Spinner.classList.add("hidden");
 		},
 		error: function (xhr, status, error) {
-			console.error("(Error) XHR Status: ", xhr.status);
-			console.error("(Error) XHR Text: ", xhr.responseText);
-			console.error("(Error) Status: ", status);
-			console.error("Error: ", error);
+			Env.CONSOLE_LOG && console.error("(Error) XHR Status: ", xhr.status);
+			Env.CONSOLE_LOG && console.error("(Error) XHR Text: ", xhr.responseText);
+			Env.CONSOLE_LOG && console.error("(Error) Status: ", status);
+			Env.CONSOLE_LOG && console.error("Error: ", error);
 			if (xhr.status === 404) window.location.href = Routes.LOGIN_PAGE;
 			SectionsContainer.innerText = "Error getting Sections...";
 			Action_Spinner.classList.add("hidden");
@@ -393,25 +369,12 @@ function populateSections() {
 
 function createSection(row: any) {
 	const Section = document.createElement("div");
-	Section.classList.add(
-		"border-2",
-		`border-${row.color}-500`,
-		"rounded",
-		"whitespace-nowrap",
-	);
+	Section.classList.add("border-2", `border-${row.color}-500`, "rounded", "whitespace-nowrap");
 
 	Section.id = row.id;
 
 	const DetailsContainer = document.createElement("div");
-	DetailsContainer.classList.add(
-		"flex",
-		"flex-row",
-		"gap-5",
-		"p-5",
-		"items-end",
-		"text-white",
-		`bg-${row.color}-500`,
-	);
+	DetailsContainer.classList.add("flex", "flex-row", "gap-5", "p-5", "items-end", "text-white", `bg-${row.color}-500`);
 
 	const SectionTitle = document.createElement("span");
 	SectionTitle.classList.add("text-2xl", "font-bold");
@@ -433,14 +396,7 @@ function createSection(row: any) {
   S.Y. ${dateFormatter.format(syStart)} - ${dateFormatter.format(syEnd)}`;
 
 	const SectionActions = document.createElement("div");
-	SectionActions.classList.add(
-		"flex",
-		"flex-row",
-		"flex-grow",
-		"gap-2",
-		"justify-end",
-		"text-sm",
-	);
+	SectionActions.classList.add("flex", "flex-row", "flex-grow", "gap-2", "justify-end", "text-sm");
 
 	const SectionAddButton = document.createElement("button");
 	SectionAddButton.setAttribute("data-modal-target", "StudentModal");
@@ -516,11 +472,7 @@ function createSection(row: any) {
 	};
 
 	const SectionHideButton = document.createElement("button");
-	SectionHideButton.classList.add(
-		"p-2",
-		"font-medium",
-		"hover:text-neutral-100",
-	);
+	SectionHideButton.classList.add("p-2", "font-medium", "hover:text-neutral-100");
 	const SectionHideButtonText = document.createElement("span");
 	SectionHideButtonText.innerText = "Hide";
 	const SectionHideButtonIcon = document.createElement("i");
@@ -544,12 +496,7 @@ function createSection(row: any) {
 	Table.id = row.id + "-TABLE";
 
 	const TableHead = document.createElement("thead");
-	TableHead.classList.add(
-		"uppercase",
-		`bg-${row.color}-500`,
-		"text-white",
-		"text-lg",
-	);
+	TableHead.classList.add("uppercase", `bg-${row.color}-500`, "text-white", "text-lg");
 
 	const TableHeadRow = document.createElement("tr");
 
@@ -625,8 +572,7 @@ function createSection(row: any) {
 
 		if (
 			today.getMonth() < birthday.getMonth() ||
-			(today.getMonth() === birthday.getMonth() &&
-				today.getDate() < birthday.getDate())
+			(today.getMonth() === birthday.getMonth() && today.getDate() < birthday.getDate())
 		) {
 			age -= 1;
 		}
@@ -639,14 +585,10 @@ function createSection(row: any) {
 		let TableBodyRow = document.createElement("tr");
 		TableBodyRow.innerHTML = `
     <td class='px-6 py-3 text-neutral-400 text-lg font-mono'>${student.id}</td>
-    <td class='px-6 py-3 ${genderColor} uppercase font-semibold'>${
-			student.gender
-		}</td>
+    <td class='px-6 py-3 ${genderColor} uppercase font-semibold'>${student.gender}</td>
     <td class='px-6 py-3 font-bold uppercase'>${student.last_name}</td>
     <td class='px-6 py-3'>${student.first_name}</td>
-    <td class='px-6 py-3'>${dateFormatter.format(
-			new Date(student.birthday),
-		)}</td>
+    <td class='px-6 py-3'>${dateFormatter.format(new Date(student.birthday))}</td>
     <td class='px-6 py-3'>${age}</td>
   `;
 
@@ -769,8 +711,7 @@ function reloadFlowbiteScript() {
 
 	// Create a new script element
 	const newScript = document.createElement("script");
-	newScript.src =
-		"https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.6.6/flowbite.min.js";
+	newScript.src = "https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.6.6/flowbite.min.js";
 	newScript.defer = true;
 
 	// Append the new script element to the document body or any other appropriate location
@@ -781,20 +722,19 @@ document.getElementById("LogoutButton")?.addEventListener("click", () => {
 	$.ajax({
 		type: "POST",
 		url: Routes.SESSIONS_API,
-		data:
-			"logout=" + JSON.stringify({ token: sessionStorage.getItem("token") }),
+		data: "logout=" + JSON.stringify({ token: sessionStorage.getItem("token") }),
 		success: function (response) {
-			console.log("Successful Response: ", JSON.parse(response) || response);
+			Env.CONSOLE_LOG && console.log("Successful Response: ", JSON.parse(response) || response);
 			sessionStorage.removeItem("token");
 			window.location.href = Routes.LOGIN_PAGE;
 		},
 		error: function (xhr, status, error) {
-			console.group("Logout Errors:");
-			console.error("(Error) XHR Status: ", xhr.status);
-			console.error("(Error) XHR Text: ", xhr.responseText);
-			console.error("(Error) Status: ", status);
-			console.error("Error: ", error);
-			console.groupEnd();
+			Env.CONSOLE_LOG && console.group("Logout Errors:");
+			Env.CONSOLE_LOG && console.error("(Error) XHR Status: ", xhr.status);
+			Env.CONSOLE_LOG && console.error("(Error) XHR Text: ", xhr.responseText);
+			Env.CONSOLE_LOG && console.error("(Error) Status: ", status);
+			Env.CONSOLE_LOG && console.error("Error: ", error);
+			Env.CONSOLE_LOG && console.groupEnd();
 
 			sessionStorage.removeItem("token");
 			if (xhr.status === 403) window.location.href = Routes.LOGIN_PAGE;

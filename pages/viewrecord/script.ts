@@ -360,12 +360,13 @@ function editStudentActivity(
 	const StudentActivityModalText = document.getElementById("StudentActivityModalText") as HTMLDivElement;
 
 	StudentActivityModalText.innerHTML = `
-		${activity.name} <br/><br/>
-		${activity.type} <br/><br/>
+		Activity Name: <br> ${activity.name} <br/><br/>
+		Activity Type: <br> ${activity.type} <br/><br/>
 	`;
 
 	ActivityComponentList.innerHTML = "";
 
+	let studentActivityScore = 0;
 	let componentScoreTotal = 0;
 	let componentScoreTotalBonus = 0;
 	for (let component of activity.components) {
@@ -382,6 +383,7 @@ function editStudentActivity(
 			for (let activityComponents of activity.components) {
 				if (activityComponents.id === component.id) {
 					findStudentScore = activityComponents.score;
+					studentActivityScore += activityComponents.score;
 				}
 			}
 		}
@@ -417,9 +419,13 @@ function editStudentActivity(
 			ActivityComponentList.querySelectorAll("tr td input").forEach((input) => {
 				totalscore += parseInt((input as HTMLInputElement).value);
 			});
-			document.getElementById("StudentActivityStudentTotalScore")!.innerText = totalscore.toString();
+			document.getElementById("StudentActivityStudentTotalScore")!.innerText =
+				totalscore.toString() + ` / ${componentScoreTotal}`;
 		});
 	});
+
+	document.getElementById("StudentActivityStudentTotalScore")!.innerText =
+		studentActivityScore.toString() + ` / ${componentScoreTotal}`;
 
 	document.getElementById(
 		"StudentActivityTotalScore",
@@ -865,6 +871,8 @@ function populateComponentList(record: dts.InterfaceRecord) {
 					}, 0),
 				0,
 			);
+			let limitScore = studentTotalScore;
+			limitScore > getActivityTotalScore && (limitScore = getActivityTotalScore);
 
 			TableBodyRow.insertAdjacentHTML(
 				"beforeend",
@@ -874,7 +882,7 @@ function populateComponentList(record: dts.InterfaceRecord) {
         ${studentTotalScore} / ${getActivityTotalScore}
         </td>
         <td class='px-6 py-3 text-center border-x border-x-neutral-400 font-semibold'>
-        ${studentTotalScore > 0 ? ((studentTotalScore / getActivityTotalScore) * 100).toFixed(2) : 0} %
+        ${limitScore > 0 ? ((limitScore / getActivityTotalScore) * 100).toFixed(2) : 0} %
         </td>
         <td class='px-6 py-3 text-center border-x border-x-neutral-400 font-semibold'>
         ${
@@ -883,7 +891,7 @@ function populateComponentList(record: dts.InterfaceRecord) {
 						100,
 						0,
 						parseInt(component.score as string) || 0,
-						(studentTotalScore / getActivityTotalScore) * 100 || 0,
+						(limitScore / getActivityTotalScore) * 100 || 0,
 					).toFixed(2) || 0
 				} %
         </td>
@@ -1075,8 +1083,10 @@ function populateComponentList(record: dts.InterfaceRecord) {
 
 			let studentSum = 0;
 			let collectRecordActivities: Array<string> = [];
+			let maxScore = 0;
 			component.activities.forEach((activity) => {
 				activity.components.forEach((component) => {
+					maxScore += component.bonus ? 0 : parseInt(component.score as string) || 0;
 					collectRecordActivities.push(component.id);
 				});
 			});
@@ -1087,6 +1097,8 @@ function populateComponentList(record: dts.InterfaceRecord) {
 					}
 				}
 			}
+
+			studentSum > maxScore && (studentSum = maxScore);
 
 			let totalWeighted =
 				LinearScale(0, 100, 0, parseInt(component.score as string) || 0, (studentSum / componentSum) * 100) || 0;

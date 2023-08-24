@@ -161,6 +161,35 @@ function populate(records: Record[], color: string) {
 		for (let [r_component_index, r_component] of record.components.entries()) {
 			let student_score = 0;
 			let max_score = 0;
+			if (r_component.activities.length == 0) {
+				TableBody.innerHTML += `
+					<tr>
+						<td class='px-6 py-2 font-semibold'>
+						${r_component.name}
+						</td>
+						<td class='px-6 py-2 text-neutral-500'>
+						No activities yet...
+						</td>
+						<td class='px-6 py-2'>
+						
+						</td>
+						<td class='px-6 py-2'>
+						
+						</td>
+						<td class='px-6 py-2'>
+						
+						</td>
+						<td class='px-6 py-2 text-center'>
+						
+						</td>
+						<td class='px-6 py-2 text-center'>
+						
+						</td>
+					</tr>
+				
+				`;
+			}
+
 			for (let [activity_index, activity] of r_component.activities.entries()) {
 				for (let [a_component_index, a_component] of activity.components.entries()) {
 					TableBody.innerHTML += `
@@ -170,31 +199,36 @@ function populate(records: Record[], color: string) {
 							</td>
 							<td class='px-6 py-2'>
 							${a_component_index > 0 ? "" : activity.name}
+							
 							</td>
 							<td class='px-6 py-2'>
 							${a_component_index > 0 ? "" : activity.type}
 							</td>
 							<td class='px-6 py-2'>
 							${a_component.name}
+							${a_component.bonus ? "<i class='fa-solid fa-square-plus text-green-500 ml-1'></i>" : ""}
 							</td>
 							<td class='px-6 py-2'>
 							${a_component.type}
+							${a_component.bonus ? "<i class='fa-solid fa-square-plus text-green-500 ml-1'></i>" : ""}
 							</td>
-							<td class='px-6 py-2 text-center'>
+							<td class='px-6 py-2 text-center ${a_component.bonus ? "text-green-500" : ""}'>
 							${a_component.score}
 							</td>
-							<td class='px-6 py-2 text-center'>
+							<td class='px-6 py-2 text-center ${a_component.bonus ? "text-green-500" : ""}'>
+
 							${a_component.maxScore}
 							</td>
 						</tr>
 					`;
 
 					student_score += a_component.score;
-					max_score += a_component.maxScore;
+					max_score += a_component.bonus ? 0 : a_component.maxScore;
 				}
 			}
-
-			let percentage = (student_score / max_score) * 100 || 0;
+			let limitScore = student_score;
+			limitScore > max_score && (limitScore = max_score);
+			let percentage = (limitScore / max_score) * 100 || 0;
 			let weighted = LinearScale(0, 100, 0, r_component.score, percentage) || 0;
 			weightedList.push(weighted);
 
@@ -231,7 +265,7 @@ function populate(records: Record[], color: string) {
 		TableFooter.innerHTML = `
 			<tr class='uppercase font-medium text-neutral-500'>
 				<td class='px-6 py-2' colspan='4'>Final Grade</td>
-				<td class='px-6 py-2 text-center'>Category</td>
+				<td class='px-6 py-2 text-right'>Category</td>
 				<td class='px-6 py-2 text-center'>Percentage</td>
 				<td class='px-6 py-2 text-center'>Weighted</td>
 			</tr>

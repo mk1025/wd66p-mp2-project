@@ -1,5 +1,6 @@
 var _a;
 import * as Routes from "../../scripts/routes";
+import * as Env from "../../scripts/env";
 import { Modal } from "flowbite";
 const SectionModal = new Modal(document.getElementById("SectionModal"), {
     closable: false,
@@ -95,11 +96,11 @@ function editSectionInit(data) {
         Color: pickedColor,
         Button: (_a = SectionModalButton.getAttribute("onclick")) === null || _a === void 0 ? void 0 : _a.toString(),
     };
-    console.log("Edit Section Init: ", display);
+    Env.CONSOLE_LOG && console.log("Edit Section Init: ", display);
     SectionModal.show();
 }
 function deleteSectionInit(data) {
-    console.log("Delete Section INIT: ", data);
+    Env.CONSOLE_LOG && console.log("Delete Section INIT: ", data);
     DeleteModalText.innerText = `Are you sure you want to delete '${data.name}' section? All students and their scores in this section will be deleted also.`;
     DeleteModalButton.onclick = () => {
         DeleteModal.hide();
@@ -150,7 +151,7 @@ function editStudentInit(section, data) {
     document.getElementById("StudentModalCancelButton").onclick = () => {
         StudentModal.hide();
     };
-    console.log("Edit Student Init: ", { section, data });
+    Env.CONSOLE_LOG && console.log("Edit Student Init: ", { section, data });
     let firstNameInput = document.getElementById("first_name");
     let lastNameInput = document.getElementById("last_name");
     let genderInput = document.getElementById("gender");
@@ -179,7 +180,7 @@ function deleteStudentInit(section, data) {
     document.getElementById("DeleteModalCancelButton").onclick = () => {
         DeleteModal.hide();
     };
-    console.log("Delete Student Init: ", { section, data });
+    Env.CONSOLE_LOG && console.log("Delete Student Init: ", { section, data });
     DeleteModalText.innerText = `Are you sure you want to delete '${data.first_name}' student from this section?`;
     DeleteModalButton.onclick = () => {
         DeleteModal.hide();
@@ -212,16 +213,16 @@ function sendDataSection(title, data) {
         data: `${title}=` + JSON.stringify(postData),
         success: function (response) {
             Action_Spinner.classList.add("hidden");
-            console.log("Successful Response: ", JSON.parse(response) || response);
+            Env.CONSOLE_LOG && console.log("Successful Response: ", JSON.parse(response) || response);
             populateSections();
             handleResponseData(JSON.parse(response));
         },
         error: function (xhr, status, error) {
             Action_Spinner.classList.add("hidden");
-            console.log("XHR Status: ", xhr.status);
-            console.log("XHR Text: ", xhr.responseText);
-            console.log("Status: ", status);
-            console.error("Error: ", error);
+            Env.CONSOLE_LOG && console.log("XHR Status: ", xhr.status);
+            Env.CONSOLE_LOG && console.log("XHR Text: ", xhr.responseText);
+            Env.CONSOLE_LOG && console.log("Status: ", status);
+            Env.CONSOLE_LOG && console.error("Error: ", error);
             handleResponseData(JSON.parse(xhr.responseText));
         },
     });
@@ -237,23 +238,23 @@ function sendDataStudent(title, data) {
         gender: data.gender,
         birthday: data.birthday,
     };
-    console.log(postData);
+    Env.CONSOLE_LOG && console.log(postData);
     $.ajax({
         type: "POST",
         url: Routes.STUDENTS_API,
         data: `${title}=` + JSON.stringify(postData),
         success: function (response) {
             Action_Spinner.classList.add("hidden");
-            console.log("Successful Response: ", JSON.parse(response) || response);
+            Env.CONSOLE_LOG && console.log("Successful Response: ", JSON.parse(response) || response);
             populateSections();
             handleResponseData(JSON.parse(response));
         },
         error: function (xhr, status, error) {
             Action_Spinner.classList.add("hidden");
-            console.log("XHR Status: ", xhr.status);
-            console.log("XHR Text: ", xhr.responseText);
-            console.log("Status: ", status);
-            console.error("Error: ", error);
+            Env.CONSOLE_LOG && console.log("XHR Status: ", xhr.status);
+            Env.CONSOLE_LOG && console.log("XHR Text: ", xhr.responseText);
+            Env.CONSOLE_LOG && console.log("Status: ", status);
+            Env.CONSOLE_LOG && console.error("Error: ", error);
             handleResponseData(JSON.parse(xhr.responseText));
         },
     });
@@ -269,7 +270,7 @@ function populateSections() {
         url: Routes.STUDENTS_API,
         data: "populate=" + JSON.stringify(data),
         success: function (response) {
-            console.log("Successful Response: ", JSON.parse(response) || response);
+            Env.CONSOLE_LOG && console.log("Successful Response: ", JSON.parse(response) || response);
             if (JSON.parse(response) && JSON.parse(response).data.length !== 0) {
                 let data = JSON.parse(response).data;
                 SectionsContainer.innerHTML = `
@@ -287,10 +288,10 @@ function populateSections() {
             Action_Spinner.classList.add("hidden");
         },
         error: function (xhr, status, error) {
-            console.error("(Error) XHR Status: ", xhr.status);
-            console.error("(Error) XHR Text: ", xhr.responseText);
-            console.error("(Error) Status: ", status);
-            console.error("Error: ", error);
+            Env.CONSOLE_LOG && console.error("(Error) XHR Status: ", xhr.status);
+            Env.CONSOLE_LOG && console.error("(Error) XHR Text: ", xhr.responseText);
+            Env.CONSOLE_LOG && console.error("(Error) Status: ", status);
+            Env.CONSOLE_LOG && console.error("Error: ", error);
             if (xhr.status === 404)
                 window.location.href = Routes.LOGIN_PAGE;
             SectionsContainer.innerText = "Error getting Sections...";
@@ -438,8 +439,7 @@ function createSection(row) {
         const birthday = new Date(student.birthday);
         let age = today.getFullYear() - birthday.getFullYear();
         if (today.getMonth() < birthday.getMonth() ||
-            (today.getMonth() === birthday.getMonth() &&
-                today.getDate() < birthday.getDate())) {
+            (today.getMonth() === birthday.getMonth() && today.getDate() < birthday.getDate())) {
             age -= 1;
         }
         let genderColor = "text-neutral-500";
@@ -527,8 +527,7 @@ function reloadFlowbiteScript() {
         existingScript.remove();
     }
     const newScript = document.createElement("script");
-    newScript.src =
-        "https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.6.6/flowbite.min.js";
+    newScript.src = "https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.6.6/flowbite.min.js";
     newScript.defer = true;
     document.body.appendChild(newScript);
 }
@@ -538,17 +537,17 @@ function reloadFlowbiteScript() {
         url: Routes.SESSIONS_API,
         data: "logout=" + JSON.stringify({ token: sessionStorage.getItem("token") }),
         success: function (response) {
-            console.log("Successful Response: ", JSON.parse(response) || response);
+            Env.CONSOLE_LOG && console.log("Successful Response: ", JSON.parse(response) || response);
             sessionStorage.removeItem("token");
             window.location.href = Routes.LOGIN_PAGE;
         },
         error: function (xhr, status, error) {
-            console.group("Logout Errors:");
-            console.error("(Error) XHR Status: ", xhr.status);
-            console.error("(Error) XHR Text: ", xhr.responseText);
-            console.error("(Error) Status: ", status);
-            console.error("Error: ", error);
-            console.groupEnd();
+            Env.CONSOLE_LOG && console.group("Logout Errors:");
+            Env.CONSOLE_LOG && console.error("(Error) XHR Status: ", xhr.status);
+            Env.CONSOLE_LOG && console.error("(Error) XHR Text: ", xhr.responseText);
+            Env.CONSOLE_LOG && console.error("(Error) Status: ", status);
+            Env.CONSOLE_LOG && console.error("Error: ", error);
+            Env.CONSOLE_LOG && console.groupEnd();
             sessionStorage.removeItem("token");
             if (xhr.status === 403)
                 window.location.href = Routes.LOGIN_PAGE;

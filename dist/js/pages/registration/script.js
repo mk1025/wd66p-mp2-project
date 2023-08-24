@@ -106,17 +106,17 @@ profileUploadBtn.addEventListener("change", () => {
         image.onload = () => {
             const width = image.width;
             const height = image.height;
-            console.log(`Image Size -> W: ${width}, H: ${height}`);
+            Environment.CONSOLE_LOG && console.log(`Image Size -> W: ${width}, H: ${height}`);
             if (width >= Environment.PROFILE_MIN_WIDTH &&
                 width <= Environment.PROFILE_MAX_WIDTH &&
                 height >= Environment.PROFILE_MIN_HEIGHT &&
                 height <= Environment.PROFILE_MAX_HEIGHT) {
                 validationMessage("vm-image-size", "", false);
-                console.log(imagefile);
+                Environment.CONSOLE_LOG && console.log(imagefile);
             }
             else {
                 validationMessage("vm-image-size", `Image height and width must be between ${Environment.PROFILE_MIN_HEIGHT}px and ${Environment.PROFILE_MAX_HEIGHT}px.`, true);
-                console.log("Invalid Image Size");
+                Environment.CONSOLE_LOG && console.log("Invalid Image Size");
             }
             profilePlaceholder.src = image.src;
         };
@@ -185,14 +185,16 @@ function sendData() {
         processData: false,
         contentType: false,
         success: function (response) {
-            console.log(response);
+            Environment.CONSOLE_LOG && console.log(response);
             handleResponse(response);
         },
         error: function (xhr, status, error) {
-            console.log(xhr.status);
-            console.log(xhr.responseText);
-            console.log(status);
-            console.error(error);
+            if (Environment.CONSOLE_LOG) {
+                console.error(xhr.status);
+                console.error(xhr.responseText);
+                console.error(status);
+                console.error(error);
+            }
             handleResponse(xhr.responseText);
         },
     });
@@ -205,6 +207,9 @@ function handleResponse(response) {
             break;
         case 201:
             setModal("success", responseJSON.title, responseJSON.message);
+            setTimeout(() => {
+                window.location.href = Routes.LOGIN_PAGE;
+            }, 5000);
             break;
         case 409:
             setModal("warning", responseJSON.title, responseJSON.message);
@@ -221,8 +226,7 @@ function setModal(status, title, message) {
             modalIcon.className = "fa-solid fa-circle-xmark text-4xl text-red-400";
             break;
         case "warning":
-            modalIcon.className =
-                "fa-solid fa-circle-exclamation text-4xl text-orange-400";
+            modalIcon.className = "fa-solid fa-circle-exclamation text-4xl text-orange-400";
             break;
         case "success":
             modalIcon.className = "fa-solid fa-circle-check text-4xl text-green-400";

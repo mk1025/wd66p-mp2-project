@@ -280,10 +280,11 @@ function editStudentActivity(record_id, activity, student, component_id) {
     const ActivityComponentList = document.getElementById("StudentActivityTableBody");
     const StudentActivityModalText = document.getElementById("StudentActivityModalText");
     StudentActivityModalText.innerHTML = `
-		${activity.name} <br/><br/>
-		${activity.type} <br/><br/>
+		Activity Name: <br> ${activity.name} <br/><br/>
+		Activity Type: <br> ${activity.type} <br/><br/>
 	`;
     ActivityComponentList.innerHTML = "";
+    let studentActivityScore = 0;
     let componentScoreTotal = 0;
     let componentScoreTotalBonus = 0;
     for (let component of activity.components) {
@@ -299,6 +300,7 @@ function editStudentActivity(record_id, activity, student, component_id) {
             for (let activityComponents of activity.components) {
                 if (activityComponents.id === component.id) {
                     findStudentScore = activityComponents.score;
+                    studentActivityScore += activityComponents.score;
                 }
             }
         }
@@ -329,9 +331,12 @@ function editStudentActivity(record_id, activity, student, component_id) {
             ActivityComponentList.querySelectorAll("tr td input").forEach((input) => {
                 totalscore += parseInt(input.value);
             });
-            document.getElementById("StudentActivityStudentTotalScore").innerText = totalscore.toString();
+            document.getElementById("StudentActivityStudentTotalScore").innerText =
+                totalscore.toString() + ` / ${componentScoreTotal}`;
         });
     });
+    document.getElementById("StudentActivityStudentTotalScore").innerText =
+        studentActivityScore.toString() + ` / ${componentScoreTotal}`;
     document.getElementById("StudentActivityTotalScore").innerText = `${componentScoreTotal} / ${componentScoreTotalBonus}`;
     StudentActivityModalButton.onclick = () => {
         StudentActivityModal.hide();
@@ -622,16 +627,18 @@ function populateComponentList(record) {
                     }
                     return sum + parseInt(component.score) || 0;
                 }, 0), 0);
+            let limitScore = studentTotalScore;
+            limitScore > getActivityTotalScore && (limitScore = getActivityTotalScore);
             TableBodyRow.insertAdjacentHTML("beforeend", `
         <td class='px-6 py-3 text-center border-x border-x-neutral-400'></td>
         <td class='px-6 py-3 text-center border-x border-x-neutral-400 font-semibold'>
         ${studentTotalScore} / ${getActivityTotalScore}
         </td>
         <td class='px-6 py-3 text-center border-x border-x-neutral-400 font-semibold'>
-        ${studentTotalScore > 0 ? ((studentTotalScore / getActivityTotalScore) * 100).toFixed(2) : 0} %
+        ${limitScore > 0 ? ((limitScore / getActivityTotalScore) * 100).toFixed(2) : 0} %
         </td>
         <td class='px-6 py-3 text-center border-x border-x-neutral-400 font-semibold'>
-        ${LinearScale(0, 100, 0, parseInt(component.score) || 0, (studentTotalScore / getActivityTotalScore) * 100 || 0).toFixed(2) || 0} %
+        ${LinearScale(0, 100, 0, parseInt(component.score) || 0, (limitScore / getActivityTotalScore) * 100 || 0).toFixed(2) || 0} %
         </td>
       `);
             TableBody.appendChild(TableBodyRow);
@@ -764,8 +771,10 @@ function populateComponentList(record) {
             }
             let studentSum = 0;
             let collectRecordActivities = [];
+            let maxScore = 0;
             component.activities.forEach((activity) => {
                 activity.components.forEach((component) => {
+                    maxScore += component.bonus ? 0 : parseInt(component.score) || 0;
                     collectRecordActivities.push(component.id);
                 });
             });
@@ -776,6 +785,7 @@ function populateComponentList(record) {
                     }
                 }
             }
+            studentSum > maxScore && (studentSum = maxScore);
             let totalWeighted = LinearScale(0, 100, 0, parseInt(component.score) || 0, (studentSum / componentSum) * 100) || 0;
             componentScoreList.push(totalWeighted);
         }

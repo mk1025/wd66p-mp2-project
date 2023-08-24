@@ -10,7 +10,7 @@ Login_Button === null || Login_Button === void 0 ? void 0 : Login_Button.addEven
     window.location.href = Routes.LOGIN_PAGE_FROM_HOME;
 });
 ForStudents_Button === null || ForStudents_Button === void 0 ? void 0 : ForStudents_Button.addEventListener("click", () => {
-    window.location.href = "#";
+    window.location.href = "./pages/checkgrades";
 });
 Features_Button === null || Features_Button === void 0 ? void 0 : Features_Button.addEventListener("click", () => {
     let element = document.getElementById("Features_Section");

@@ -61,4 +61,5 @@ export interface ActivityComponents {
 	type: string;
 	score: number;
 	maxScore: number;
+	bonus: boolean;
 }
